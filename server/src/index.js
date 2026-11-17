@@ -56,10 +56,15 @@ app.use((err, req, res, next) => {
 // 세션 저장소 등에서 놓친 비동기 오류로 서버 전체가 죽지 않게 기록만 한다
 process.on('unhandledRejection', (err) => console.error('[unhandledRejection]', err));
 
-const server = http.createServer(app);
-require('./socket').attachSocket(server, sessionMiddleware);
-server.listen(config.port, config.host, () => {
-  console.log(`AQUABIT API on http://${config.host || 'localhost'}:${config.port} (TIME_SCALE=${config.timeScale})`);
-});
+// Vercel(서버리스)에서는 app만 내보내고 직접 포트를 열지 않는다 (api/index.js가 불러감).
+// 계속 연결을 붙잡는 Socket.IO는 서버리스에서 돌 수 없어서, 화면은 자동으로 폴링으로 동작한다.
+let server = null;
+if (!process.env.VERCEL) {
+  server = http.createServer(app);
+  require('./socket').attachSocket(server, sessionMiddleware);
+  server.listen(config.port, config.host, () => {
+    console.log(`AQUABIT API on http://${config.host || 'localhost'}:${config.port} (TIME_SCALE=${config.timeScale})`);
+  });
+}
 
 module.exports = { app, server, sessionMiddleware };
