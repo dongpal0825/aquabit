@@ -16,7 +16,9 @@
 
 ```bash
 sudo dnf -y update
-sudo dnf -y install httpd mysql-server git
+sudo dnf -y install httpd git rsync
+# MySQL: Rocky 10은 mysql8.4-server, 이전 버전은 mysql-server
+sudo dnf -y install mysql8.4-server || sudo dnf -y install mysql-server
 # Node.js 20 이상 (AppStream 모듈 또는 NodeSource)
 sudo dnf -y install nodejs npm
 node -v
@@ -70,19 +72,21 @@ DB_USER=aquabit
 DB_PASSWORD=긴-비밀번호
 DB_NAME=aquabit
 TIME_SCALE=1
-ADMIN_ENABLED=true          # 관리자 기능이 필요 없으면 false
+ADMIN_ENABLED=true
 ADMIN_USERNAME=admin
-ADMIN_PASSWORD=<긴 무작위 비밀번호>   # 인터넷에 열린 서버에서는 예시 비밀번호 금지
+ADMIN_PASSWORD=<긴 무작위 비밀번호>
 ```
 
-테이블을 만들고 (필요하면) 테스트 데이터를 넣습니다.
+> 값 뒤에 `# 설명`을 붙이지 마세요. 주석은 줄 맨 앞에 `#`로만 씁니다. 관리자 기능이 필요 없으면 `ADMIN_ENABLED=false`.
+
+파일 주인을 서비스 계정으로 바꾼 뒤 테이블을 만들고 (필요하면) 테스트 데이터를 넣습니다.
 
 ```bash
+sudo chown -R aquabit:aquabit /opt/aquabit
+sudo chmod 600 /opt/aquabit/server/.env
 sudo -u aquabit npm run db:init
 sudo -u aquabit npm run seed        # 시연용 테스트 계정이 필요할 때만 (관리자 계정도 같이 만듦)
 sudo -u aquabit npm run admin:create   # seed 없이 관리자 계정만 만들 때
-sudo chown -R aquabit:aquabit /opt/aquabit
-sudo chmod 600 /opt/aquabit/server/.env
 ```
 
 ## 4. 정적 파일 배치
@@ -109,7 +113,7 @@ Type=simple
 User=aquabit
 Group=aquabit
 WorkingDirectory=/opt/aquabit/server
-EnvironmentFile=/opt/aquabit/server/.env
+# 설정은 앱이 server/.env를 직접 읽는다 (EnvironmentFile은 쓰지 않음)
 ExecStart=/usr/bin/node src/index.js
 Restart=on-failure
 RestartSec=3
