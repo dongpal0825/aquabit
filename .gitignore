@@ -1,0 +1,8 @@
+node_modules/
+.env
+sql/*.local.sql
+shots/
+
+# 로컬 도구 설정, 작업용 파일
+.claude/
+*.zip

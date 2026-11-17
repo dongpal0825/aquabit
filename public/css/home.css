@@ -1,0 +1,167 @@
+/* 홈: 페이지 전체가 하나의 어항 — 물(히어로) → 모래 바닥 → 어항 받침대(푸터) */
+
+.wrap { width: min(1120px, 100% - 32px); margin-inline: auto; }
+
+/* ── 히어로: 살아 있는 어항 ── */
+.hero {
+  position: relative;
+  min-height: 100vh;
+  min-height: 100svh;
+  overflow: hidden;
+  background: #86e6ea;
+}
+.hero-tank { position: absolute; inset: 0; }
+
+.topnav {
+  position: absolute; top: 0; left: 0; right: 0;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 20px clamp(16px, 4vw, 48px);
+  pointer-events: none;
+  z-index: 2;
+}
+.topnav > * { pointer-events: auto; }
+.wordmark {
+  font-size: 22px;
+  text-decoration: none;
+  color: var(--ink);
+  padding: 6px 10px 8px;
+  background: var(--pearl);
+  box-shadow: 0 -3px 0 var(--ink), 0 3px 0 var(--ink), -3px 0 0 var(--ink), 3px 0 0 var(--ink);
+}
+.topnav-actions { display: flex; gap: 8px; }
+
+.hero-copy {
+  position: absolute;
+  left: clamp(16px, 6vw, 88px);
+  top: clamp(108px, 20vh, 200px);
+  width: min(720px, calc(100% - 32px));
+  z-index: 2;
+  pointer-events: none;
+}
+.hero-copy > * { pointer-events: auto; }
+.hero-title {
+  margin: 0 0 20px;
+  font-family: var(--font-pixel-big);
+  font-weight: 400;
+  font-size: clamp(32px, 4.6vw, 68px);
+  line-height: 1.22;
+  word-break: keep-all;
+  color: var(--ink);
+  /* 한 칸 아래로 떨어진 픽셀 그림자 */
+  text-shadow: 3px 3px 0 rgba(255, 255, 255, 0.7);
+}
+.hero-sub {
+  max-width: 30em;
+  margin: 0 0 28px;
+  font-size: clamp(16px, 1.4vw, 18px);
+  line-height: 1.7;
+  color: #12406a;
+  background: rgba(239, 252, 249, 0.72);
+  padding: 10px 14px;
+  box-shadow: -4px 0 0 var(--ink);
+}
+.hero-cta { display: flex; flex-wrap: wrap; gap: 10px; margin-left: -4px; }
+
+/* ── 모래 바닥 섹션 ── */
+.loop, .grow, .about { color: var(--ink); }
+.loop {
+  background: #f5d98f;
+  padding: 72px 0 80px;
+  border-top: 8px solid #fbe9b4;
+}
+.section-title {
+  margin: 0 0 12px;
+  font-family: var(--font-pixel-big);
+  font-weight: 400;
+  font-size: clamp(24px, 3vw, 34px);
+  line-height: 1.3;
+}
+.section-lead { max-width: 36em; margin: 0 0 36px; font-size: 17px; color: #3a5574; }
+
+.loop-steps {
+  list-style: none;
+  margin: 40px 0 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 0;
+  position: relative;
+}
+/* 단계를 잇는 점선 길 */
+.loop-steps::before {
+  content: '';
+  position: absolute;
+  top: 22px; left: 22px; right: 10%;
+  height: 4px;
+  background: repeating-linear-gradient(90deg, var(--ink) 0 8px, transparent 8px 16px);
+}
+.loop-steps li { position: relative; padding-right: 20px; }
+.step-n {
+  position: relative;
+  display: grid; place-items: center;
+  width: 48px; height: 48px;
+  margin-bottom: 18px;
+  background: var(--pearl);
+  font-size: 20px;
+  box-shadow: 0 -4px 0 var(--ink), 0 4px 0 var(--ink), -4px 0 0 var(--ink), 4px 0 0 var(--ink), inset 0 -4px 0 #e9d6a8;
+}
+.loop-steps li:last-child .step-n { background: var(--lagoon); color: #fff; box-shadow: 0 -4px 0 var(--ink), 0 4px 0 var(--ink), -4px 0 0 var(--ink), 4px 0 0 var(--ink), inset 0 -4px 0 var(--deep); }
+.loop-steps h3 { margin: 0 0 6px; font-family: var(--font-pixel); font-weight: 400; font-size: 17px; }
+.loop-steps p { margin: 0; font-size: 15px; line-height: 1.6; color: #3a5574; max-width: 16em; }
+
+/* ── 성장 ── */
+.grow { background: #fbe9b4; padding: 72px 0 88px; }
+.grow-strip {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  align-items: end;
+  gap: 12px;
+  padding: 36px 24px 20px;
+  margin: 4px;
+  background: linear-gradient(180deg, #9ff0ef 0 25%, #6edae4 25% 50%, #45bfd5 50% 75%, #2ba1c3 75%);
+  box-shadow: 0 -4px 0 var(--ink), 0 4px 0 var(--ink), -4px 0 0 var(--ink), 4px 0 0 var(--ink);
+}
+.grow-stage { display: grid; justify-items: center; gap: 12px; }
+.grow-stage canvas { display: block; max-width: 100%; height: auto; }
+.grow-fishbox { position: relative; display: grid; place-items: end center; min-height: 150px; }
+.grow-label {
+  display: grid; justify-items: center; gap: 2px;
+  padding: 6px 10px 8px;
+  background: rgba(16, 54, 92, 0.75);
+  color: var(--pearl);
+}
+.grow-label strong { font-family: var(--font-pixel); font-weight: 400; font-size: 16px; }
+.grow-label span { font-size: 13px; opacity: 0.85; }
+.twinkle {
+  position: absolute; width: 4px; height: 4px; background: #fff;
+  box-shadow: 0 -4px 0 #fff2a8, 0 4px 0 #fff2a8, -4px 0 0 #fff2a8, 4px 0 0 #fff2a8;
+  animation: twinkle 1.6s steps(2) infinite;
+}
+@keyframes twinkle { 50% { opacity: 0; } }
+
+/* ── 소개 ── */
+.about { background: var(--pearl); padding: 80px 0 96px; }
+.about-grid { display: grid; grid-template-columns: 1fr 1.3fr; gap: 48px; align-items: start; }
+.about-body p { margin: 0 0 16px; font-size: 17px; line-height: 1.8; max-width: 34em; }
+
+/* ── 받침대(푸터) ── */
+.stand { background: var(--ink); color: var(--pearl); padding: 40px 0 48px; border-top: 8px solid #1d4c7a; }
+.stand-inner { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px; align-items: baseline; }
+.stand-slogan { margin: 0; font-size: 18px; }
+.stand-meta { margin: 0; font-size: 14px; opacity: 0.7; }
+
+@media (max-width: 860px) {
+  .loop-steps { grid-template-columns: 1fr; gap: 24px; }
+  .loop-steps::before { top: 0; bottom: 0; left: 22px; right: auto; width: 4px; height: auto; background: repeating-linear-gradient(180deg, var(--ink) 0 8px, transparent 8px 16px); }
+  .loop-steps li { display: grid; grid-template-columns: 64px 1fr; column-gap: 12px; padding: 0; }
+  .loop-steps li .step-n { grid-row: span 2; margin: 0; }
+  .grow-strip { grid-template-columns: repeat(2, 1fr); row-gap: 28px; padding: 24px 12px 16px; }
+  .about-grid { grid-template-columns: 1fr; gap: 12px; }
+}
+@media (max-width: 560px) {
+  .topnav { padding: 14px 16px; }
+  .wordmark { font-size: 17px; }
+  .hero-copy { top: 96px; }
+  .hero-sub { font-size: 15px; }
+}

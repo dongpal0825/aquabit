@@ -1,0 +1,4 @@
+# 줄바꿈을 LF로 통일 (Rocky Linux 서버에서 그대로 쓰기 위해)
+* text=auto eol=lf
+*.png binary
+*.jpg binary
