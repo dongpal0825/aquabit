@@ -123,8 +123,29 @@
       refreshTasks();
     });
 
-    // 내 진주가 들어왔을 때 (과제 승인)
+    // 관리자 공지
+    socket.on('notice', (p) => T.toast(`<b>공지</b> ${esc(p.body)}`, 6000));
+    // 관리자가 이름, 대표, 초대 코드를 바꿨을 때
+    socket.on('tank:updated', () => T.loadTank(false));
+    // 관리자가 진주/아이템을 지급하거나 회수했을 때 (진주 증가는 아래 wallet:pearls가 연출)
+    socket.on('wallet:changed', (p) => {
+      if (p.pearlsDelta <= 0) T.setPearls(p.pearls);
+      T.state.wallet.inventory = p.inventory;
+      T.setFood(p.inventory.food);
+      if (p.item) {
+        const label = ({ food: `먹이 ${p.quantity}개`, ribbon: '리본', hat: '모자', crown: '왕관' })[p.item];
+        T.toast(`관리자가 ${Aqua.josa(label, '을', '를')} 줬어요.${p.note ? ` (${esc(p.note)})` : ''}`);
+      }
+      if (p.pearlsDelta < 0) T.toast(`관리자가 진주 ${-p.pearlsDelta}개를 회수했어요.${p.note ? ` (${esc(p.note)})` : ''}`);
+    });
+
+    // 내 진주가 들어왔을 때 (과제 승인, 관리자 지급)
     socket.on('wallet:pearls', (p) => {
+      if (p.reason === 'admin') {
+        T.toast(`관리자가 진주 ${p.amount}개를 줬어요!${p.note ? ` (${esc(p.note)})` : ''}`, 4200);
+        T.rewardPearls({ x: window.innerWidth / 2, y: window.innerHeight / 2 }, p.amount, p.pearls);
+        return;
+      }
       T.toast(`<b>${esc(Aqua.josa(p.taskTitle, '이', '가'))}</b> 승인돼서 ${p.amount}진주를 받았어요!`, 4200);
       const badge = document.getElementById('actTasks').getBoundingClientRect();
       T.rewardPearls({ x: badge.left + badge.width / 2, y: badge.top }, p.amount, p.pearls);

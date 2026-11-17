@@ -17,6 +17,7 @@ CREATE TABLE users (
   password_hash VARCHAR(100) NOT NULL,                 -- bcrypt
   nickname      VARCHAR(12)  NOT NULL,
   pearls        INT UNSIGNED NOT NULL DEFAULT 0,       -- 현재 진주 잔액 (변동은 transactions에 기록)
+  is_admin      TINYINT(1)   NOT NULL DEFAULT 0,       -- 관리자 (ADMIN_ENABLED=true일 때만 의미 있음)
   created_at    DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB;
 
@@ -101,7 +102,7 @@ CREATE TABLE transactions (
   tank_id       INT UNSIGNED NULL,
   amount        INT          NOT NULL,                -- +지급 / -사용
   balance_after INT UNSIGNED NOT NULL,
-  type          ENUM('attendance','streak_bonus','task_reward','buy_food','buy_accessory','seed') NOT NULL,
+  type          ENUM('attendance','streak_bonus','task_reward','buy_food','buy_accessory','seed','admin') NOT NULL,
   ref_id        INT UNSIGNED NULL,                    -- 과제 id 등
   description   VARCHAR(100) NOT NULL,
   created_at    DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,

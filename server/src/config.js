@@ -15,6 +15,11 @@ module.exports = {
   sessionSecret: process.env.SESSION_SECRET || 'aquabit-dev-secret', // 개발용 기본값 (운영에서는 아래에서 막음)
   serveStatic: (process.env.SERVE_STATIC || 'true') === 'true',
   timeScale: Math.max(1, num(process.env.TIME_SCALE, 1)),
+  admin: {
+    enabled: (process.env.ADMIN_ENABLED || 'true') === 'true',
+    username: process.env.ADMIN_USERNAME || 'admin',
+    password: process.env.ADMIN_PASSWORD || '',
+  },
   db: {
     host: process.env.DB_HOST || '127.0.0.1',
     port: num(process.env.DB_PORT, 3306),

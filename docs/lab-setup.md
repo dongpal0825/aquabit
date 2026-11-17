@@ -106,6 +106,8 @@ DB_PASSWORD=4번에서 정한 비밀번호
 SESSION_SECRET=아무렇게나-긴-문자열-예시-a8f3k2m9x
 ```
 
+관리자 계정을 쓰려면 `ADMIN_PASSWORD=`에 비밀번호를 적어 주세요 (비워 두면 관리자 계정을 만들지 않아요). 관리자 기능을 아예 끄려면 `ADMIN_ENABLED=false`.
+
 나머지는 그대로 두면 됩니다 (`PORT=3000`, `SERVE_STATIC=true`, `TIME_SCALE=1`).
 
 ## 6. 설치, DB 초기화, 실행

@@ -4,7 +4,8 @@
   const safeNext = next && next.startsWith('/') && !next.startsWith('//') ? next : '/tanks.html';
 
   // 이미 로그인 상태면 바로 이동
-  Aqua.currentUser().then((u) => { if (u) location.replace(safeNext); });
+  const dest = (u) => (u && u.isAdmin && !next ? '/admin.html' : safeNext);
+  Aqua.currentUser().then((u) => { if (u) location.replace(dest(u)); });
 
   // 배경 어항
   const scene = new TankScene(document.getElementById('bgTank'), { labels: false, interactive: false, maxBubbles: 10 });
@@ -37,8 +38,8 @@
     const body = Object.fromEntries(new FormData(form));
     btn.disabled = true;
     try {
-      await Aqua.api(path, { method: 'POST', body });
-      location.href = safeNext;
+      const { user } = await Aqua.api(path, { method: 'POST', body });
+      location.href = dest(user);
     } catch (e) {
       err.textContent = e.message;
       btn.disabled = false;

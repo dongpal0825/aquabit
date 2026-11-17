@@ -4,6 +4,9 @@
   const user = await Aqua.requireLogin();
   document.getElementById('nick').textContent = `${user.nickname}님`;
   document.getElementById('logoutBtn').addEventListener('click', Aqua.logout);
+  if (user.isAdmin) {
+    document.getElementById('logoutBtn').insertAdjacentHTML('beforebegin', '<a class="btn btn--small" href="/admin.html">관리자</a>');
+  }
   document.getElementById('pearlIcon').appendChild(PA.iconCanvas('pearl', 2));
   document.getElementById('pearlCount').textContent = user.pearls;
 

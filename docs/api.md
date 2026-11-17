@@ -282,6 +282,26 @@
 
 ---
 
+## 관리자 (`ADMIN_ENABLED=true`일 때만)
+
+모두 `/api/admin` 아래, `users.is_admin = 1`인 계정만 (아니면 403, 꺼져 있으면 404).
+관리자 계정은 `server/.env`의 `ADMIN_USERNAME`, `ADMIN_PASSWORD`로 `npm run seed` 또는 `npm run admin:create`가 만듭니다.
+`GET /api/auth/me`의 `user.isAdmin`으로 관리자인지 알 수 있습니다.
+
+| 메서드 | 경로 | 설명 |
+|---|---|---|
+| GET | `/admin/overview` | 사용자 수, 어항 수, 진행 중 과제, 채팅 수, 오늘 준 먹이, 돌고 있는 진주 |
+| GET | `/admin/tanks` | 모든 어항과 멤버(아이디, 물고기 단계), 진행 중 과제 수, 채팅 수 |
+| PATCH | `/admin/tanks/:id` | `{ name?, ownerId?, newInviteCode? }` 이름, 대표, 초대 코드 바꾸기 (대표가 바뀌면 새 대표의 끝나지 않은 과제는 지워짐) |
+| DELETE | `/admin/tanks/:id` | 어항 삭제 (이름 확인 없음). 소켓 `tank:deleted` |
+| GET | `/admin/users?q=` | 사용자, 진주, 아이템, 들어간 어항(대표 여부), 마지막 출석. `q`로 아이디/닉네임 검색 |
+| POST | `/admin/users/:id/grant` | `{ pearls?, item?, quantity?, reason? }` 진주 지급(음수면 회수, 잔액보다 많이는 불가), 먹이/장신구 지급. 진주 변동은 transactions에 `admin`으로 기록 |
+| POST | `/admin/notices` | `{ body, tankId? }` 공지. `tankId`가 없으면 모든 어항. 채팅에 관리자 이름으로 남고 소켓 `notice` |
+
+관리자 관련 소켓 이벤트: `notice` `{ body }`(어항 방), `tank:updated`(어항 방), `wallet:changed` `{ pearls, inventory, item, quantity, pearlsDelta, note }`(개인 방), 관리자 진주 지급은 `wallet:pearls`에 `reason: "admin"`.
+
+---
+
 ## 기타
 
 ### GET /api/health

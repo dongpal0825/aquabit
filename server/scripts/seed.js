@@ -78,9 +78,11 @@ const INVITE_CODE = 'AQUA77';
     }
   });
 
+  const admin = await require('./create-admin').createAdmin();
   console.log('시드 완료');
   console.log(`  계정: ${USERS.map((u) => u.username).join(', ')} / 비밀번호: ${PASSWORD}`);
   console.log(`  어항: 클라우드 7팀 (초대 코드 ${INVITE_CODE}, 대표 test1)`);
+  console.log(admin.skipped ? `  관리자 계정: 만들지 않음 (${admin.skipped})` : `  관리자 계정: ${admin.username} (비밀번호는 server/.env의 ADMIN_PASSWORD)`);
   console.log('  test1은 6일 연속 출석 상태 (오늘 접속하면 7일 보너스), 지우의 물고기는 먹이 1개면 성장');
   await pool.end();
 })().catch(async (e) => {

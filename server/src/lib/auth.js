@@ -23,4 +23,11 @@ const requireMember = wrap(async (req, res, next) => {
   next();
 });
 
-module.exports = { requireAuth, requireMember };
+/** 관리자만 (users.is_admin = 1) */
+const requireAdmin = wrap(async (req, res, next) => {
+  const [[u]] = await pool.query('SELECT is_admin FROM users WHERE id = ?', [req.session.userId]);
+  if (!u || !u.is_admin) throw new ApiError(403, '관리자만 쓸 수 있어요.', 'FORBIDDEN');
+  next();
+});
+
+module.exports = { requireAuth, requireMember, requireAdmin };

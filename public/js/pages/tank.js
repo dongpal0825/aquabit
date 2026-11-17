@@ -617,8 +617,8 @@
       if (m.id <= state.lastMsgId) continue;
       state.lastMsgId = m.id;
       const li = document.createElement('li');
-      li.className = 'chat-msg' + (m.userId === user.id ? ' me' : '');
-      li.innerHTML = `<span class="who">${esc(m.nickname)}</span>${esc(m.body)}<time datetime="${m.createdAt}">${Aqua.fmtTime(m.createdAt)}</time>`;
+      li.className = 'chat-msg' + (m.isAdmin ? ' notice' : m.userId === user.id ? ' me' : '');
+      li.innerHTML = `<span class="who">${m.isAdmin ? '공지' : esc(m.nickname)}</span>${esc(m.body)}<time datetime="${m.createdAt}">${Aqua.fmtTime(m.createdAt)}</time>`;
       chatList.appendChild(li);
       if (!state.chatOpen && m.userId !== user.id && state.chatLoaded) state.unread++;
       // 새로 온 채팅은 보낸 사람 물고기 위에 말풍선으로 (처음 불러온 기록은 제외)

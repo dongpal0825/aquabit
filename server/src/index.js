@@ -35,6 +35,7 @@ app.use('/api/tanks/:tankId/messages', require('./routes/messages'));
 app.use('/api/tanks/:tankId/tasks', require('./routes/tasks'));
 app.use('/api/tanks', require('./routes/tanks'));
 app.use('/api', require('./routes/economy'));
+if (config.admin.enabled) app.use('/api/admin', require('./routes/admin'));
 
 app.use('/api', (req, res) => res.status(404).json({ error: '없는 API예요.', code: 'NOT_FOUND' }));
 

@@ -8,7 +8,7 @@ const router = express.Router({ mergeParams: true });
 router.use(requireAuth, requireMember);
 
 const view = (m) => ({
-  id: Number(m.id), userId: m.user_id, nickname: m.nickname, body: m.body, createdAt: m.created_at,
+  id: Number(m.id), userId: m.user_id, nickname: m.nickname, body: m.body, createdAt: m.created_at, isAdmin: !!m.is_admin,
 });
 
 // 채팅 목록: ?after=<id> 이면 그 뒤 메시지만 (폴링용), 없으면 최근 50개
@@ -17,13 +17,13 @@ router.get('/', wrap(async (req, res) => {
   let rows;
   if (after > 0) {
     [rows] = await pool.query(
-      `SELECT m.*, u.nickname FROM messages m JOIN users u ON u.id = m.user_id
+      `SELECT m.*, u.nickname, u.is_admin FROM messages m JOIN users u ON u.id = m.user_id
         WHERE m.tank_id = ? AND m.id > ? ORDER BY m.id LIMIT 100`,
       [req.tank.id, after]
     );
   } else {
     [rows] = await pool.query(
-      `SELECT * FROM (SELECT m.*, u.nickname FROM messages m JOIN users u ON u.id = m.user_id
+      `SELECT * FROM (SELECT m.*, u.nickname, u.is_admin FROM messages m JOIN users u ON u.id = m.user_id
         WHERE m.tank_id = ? ORDER BY m.id DESC LIMIT 50) x ORDER BY id`,
       [req.tank.id]
     );
@@ -40,7 +40,7 @@ router.post('/', wrap(async (req, res) => {
     [req.tank.id, req.session.userId, body, new Date()]
   );
   const [[row]] = await pool.query(
-    'SELECT m.*, u.nickname FROM messages m JOIN users u ON u.id = m.user_id WHERE m.id = ?', [r.insertId]
+    'SELECT m.*, u.nickname, u.is_admin FROM messages m JOIN users u ON u.id = m.user_id WHERE m.id = ?', [r.insertId]
   );
   const message = view(row);
   realtime.toTank(req.tank.id, 'chat:message', message);

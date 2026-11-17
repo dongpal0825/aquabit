@@ -70,13 +70,17 @@ DB_USER=aquabit
 DB_PASSWORD=긴-비밀번호
 DB_NAME=aquabit
 TIME_SCALE=1
+ADMIN_ENABLED=true          # 관리자 기능이 필요 없으면 false
+ADMIN_USERNAME=admin
+ADMIN_PASSWORD=<긴 무작위 비밀번호>   # 인터넷에 열린 서버에서는 예시 비밀번호 금지
 ```
 
 테이블을 만들고 (필요하면) 테스트 데이터를 넣습니다.
 
 ```bash
 sudo -u aquabit npm run db:init
-sudo -u aquabit npm run seed        # 시연용 테스트 계정이 필요할 때만
+sudo -u aquabit npm run seed        # 시연용 테스트 계정이 필요할 때만 (관리자 계정도 같이 만듦)
+sudo -u aquabit npm run admin:create   # seed 없이 관리자 계정만 만들 때
 sudo chown -R aquabit:aquabit /opt/aquabit
 sudo chmod 600 /opt/aquabit/server/.env
 ```

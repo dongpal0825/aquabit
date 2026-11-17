@@ -9,7 +9,7 @@ const router = express.Router();
 const USERNAME_RE = /^[a-zA-Z0-9_]{4,20}$/;
 
 function publicUser(u) {
-  return { id: u.id, username: u.username, nickname: u.nickname, pearls: u.pearls };
+  return { id: u.id, username: u.username, nickname: u.nickname, pearls: u.pearls, isAdmin: !!u.is_admin && require('../config').admin.enabled };
 }
 
 router.post('/register', wrap(async (req, res) => {
