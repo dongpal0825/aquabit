@@ -351,23 +351,38 @@
       let tx = f.tx, ty = f.ty;
 
       if (f.chase && !f.chase.eaten) {
-        tx = f.chase.x; ty = f.chase.y;
-        maxSp = f.speed * 2.6;
+        // ── 먹이 쫓기: 어디에 떨어져도 1초 안팎에 닿도록 거리에 비례해 돌진 ──
+        const p = f.chase;
         const s = this._size(f);
-        const mouthX = f.x + f.facing * s.w * 0.42;
+        const side = p.x >= f.x ? 1 : -1;          // 먹이 쪽을 바라본다
+        f.facing = side;
+        const mouthX = f.x + side * s.w * 0.42;
         // 바닥에 가라앉은 먹이도 먹을 수 있게 세로 범위는 몸 높이의 절반 + 여유
-        if (Math.abs(mouthX - tx) < 4 + s.w * 0.12 && Math.abs(f.y - ty) < 4 + s.h * 0.5) {
-          this._eatPellet(f.chase, f);
+        if (Math.abs(mouthX - p.x) < 4 + s.w * 0.12 && Math.abs(f.y - p.y) < 4 + s.h * 0.5) {
+          this._eatPellet(p, f);
+        } else {
+          // 몸 중심이 아니라 입이 먹이에 닿는 지점을 노린다 (먹이 주위를 빙빙 돌지 않게)
+          const aimX = p.x - side * s.w * 0.42, aimY = p.y;
+          const dx = aimX - f.x, dy = aimY - f.y;
+          const dist = Math.hypot(dx, dy) || 1;
+          const want = Math.min(560, Math.max(80, dist * 5.5)); // 멀면 빠르게, 가까우면 감속
+          const k = Math.min(1, dt * 14);                       // 방향 전환 민첩함
+          f.vx += ((dx / dist) * want - f.vx) * k;
+          f.vy += ((dy / dist) * want - f.vy) * k;
+          f.x += f.vx * dt;
+          f.y += f.vy * dt;
+          this._clampFish(f);
         }
-      } else {
-        if (f.chase) f.chase = null;
-        f.retarget -= dt;
-        if (f.retarget <= 0 || Math.hypot(tx - f.x, ty - f.y) < 4) this._newTarget(f);
+        this._animateFish(f, dt, mood);
+        return;
       }
+      if (f.chase) f.chase = null;
+      f.retarget -= dt;
+      if (f.retarget <= 0 || Math.hypot(tx - f.x, ty - f.y) < 4) this._newTarget(f);
 
       const dx = tx - f.x, dy = ty - f.y;
       const dist = Math.hypot(dx, dy) || 1;
-      const accel = f.chase ? 90 : 26;
+      const accel = 26;
       f.vx += (dx / dist) * accel * dt;
       f.vy += (dy / dist) * accel * dt * 0.7;
       const sp = Math.hypot(f.vx, f.vy);
@@ -377,9 +392,12 @@
       f.y += f.vy * dt;
       if (f.vx > 1.5) f.facing = 1; else if (f.vx < -1.5) f.facing = -1;
       this._clampFish(f);
+      this._animateFish(f, dt, mood);
+    }
 
-      // 꼬리 흔들기: 빨리 헤엄칠수록 자주
-      f.frameT += dt * (1.6 + Math.hypot(f.vx, f.vy) / 6) * (reduceMotion ? 0.4 : 1);
+    _animateFish(f, dt, mood) {
+      // 꼬리 흔들기: 빨리 헤엄칠수록 자주 (너무 빠르면 깜빡여 보이니 상한)
+      f.frameT += dt * Math.min(12, 1.6 + Math.hypot(f.vx, f.vy) / 6) * (reduceMotion ? 0.4 : 1);
       f.frame = Math.floor(f.frameT * 2) % 2;
       f.bob += dt * 2 * mood;
       if (f.flash > 0) f.flash -= dt;
