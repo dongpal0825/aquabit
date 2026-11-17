@@ -32,7 +32,7 @@
 
 ### POST /api/auth/login
 ```json
-{ "username": "minkyu", "password": "aquabit123" }
+{ "username": "test1", "password": "aquabit123" }
 ```
 응답 200: `{ "user": {...} }` / 실패 401 `BAD_LOGIN`
 

@@ -5,9 +5,9 @@ const { pool, tx } = require('../src/db');
 
 const PASSWORD = 'aquabit123';
 const USERS = [
-  { username: 'minkyu', nickname: '민규', pearls: 120, food: 6 },
-  { username: 'subin', nickname: '수빈', pearls: 80, food: 3 },
-  { username: 'jiwoo', nickname: '지우', pearls: 45, food: 0 },
+  { username: 'test1', nickname: '민규', pearls: 120, food: 6 },
+  { username: 'test2', nickname: '수빈', pearls: 80, food: 3 },
+  { username: 'test3', nickname: '지우', pearls: 45, food: 0 },
 ];
 const INVITE_CODE = 'AQUA77';
 
@@ -62,7 +62,7 @@ const INVITE_CODE = 'AQUA77';
       [tankId, ids[0], ids[1], ymd(3), tankId, ids[0], ids[2], ymd(5)]
     );
 
-    // minkyu: 어제까지 6일 연속 출석 → 오늘 접속하면 7일 연속 보너스
+    // test1: 어제까지 6일 연속 출석 → 오늘 접속하면 7일 연속 보너스
     const kst = (days) => new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Seoul' }).format(new Date(now.getTime() + days * 86400000));
     for (let d = 6; d >= 1; d--) {
       await c.query('INSERT INTO attendance (user_id, att_date, streak) VALUES (?, ?, ?)', [ids[0], kst(-d), 7 - d]);
@@ -80,8 +80,8 @@ const INVITE_CODE = 'AQUA77';
 
   console.log('시드 완료');
   console.log(`  계정: ${USERS.map((u) => u.username).join(', ')} / 비밀번호: ${PASSWORD}`);
-  console.log(`  어항: 클라우드 7팀 (초대 코드 ${INVITE_CODE}, 대표 minkyu)`);
-  console.log('  minkyu는 6일 연속 출석 상태 (오늘 접속하면 7일 보너스), 지우의 물고기는 먹이 1개면 성장');
+  console.log(`  어항: 클라우드 7팀 (초대 코드 ${INVITE_CODE}, 대표 test1)`);
+  console.log('  test1은 6일 연속 출석 상태 (오늘 접속하면 7일 보너스), 지우의 물고기는 먹이 1개면 성장');
   await pool.end();
 })().catch(async (e) => {
   console.error('시드 실패:', e.message);
