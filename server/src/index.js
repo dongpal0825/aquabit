@@ -58,8 +58,8 @@ process.on('unhandledRejection', (err) => console.error('[unhandledRejection]', 
 
 const server = http.createServer(app);
 require('./socket').attachSocket(server, sessionMiddleware);
-server.listen(config.port, () => {
-  console.log(`AQUABIT API on http://localhost:${config.port} (TIME_SCALE=${config.timeScale})`);
+server.listen(config.port, config.host, () => {
+  console.log(`AQUABIT API on http://${config.host || 'localhost'}:${config.port} (TIME_SCALE=${config.timeScale})`);
 });
 
 module.exports = { app, server, sessionMiddleware };

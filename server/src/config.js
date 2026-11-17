@@ -11,6 +11,7 @@ if (process.env.NODE_ENV === 'production' && !process.env.SESSION_SECRET) {
 
 module.exports = {
   port: num(process.env.PORT, 3000),
+  host: process.env.HOST || undefined, // 비우면 모든 주소, 운영(Apache 뒤)에서는 127.0.0.1
   isProd: process.env.NODE_ENV === 'production',
   sessionSecret: process.env.SESSION_SECRET || 'aquabit-dev-secret', // 개발용 기본값 (운영에서는 아래에서 막음)
   serveStatic: (process.env.SERVE_STATIC || 'true') === 'true',

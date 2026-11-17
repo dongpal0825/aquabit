@@ -10,6 +10,8 @@
                                    └─▶ MySQL 127.0.0.1:3306
 ```
 
+실습실 web VM(`www.aquabit.lab`)에 올리는 단계별 순서표는 [lab-deploy-checklist.md](lab-deploy-checklist.md)에 있습니다.
+
 아래 명령은 `sudo` 권한이 있는 사용자 기준입니다. 경로 예시는 코드를 `/opt/aquabit`에 둔다고 가정합니다.
 
 ## 1. 패키지 설치
@@ -63,6 +65,7 @@ sudo vi .env
 
 ```ini
 PORT=3000
+HOST=127.0.0.1
 NODE_ENV=production
 SESSION_SECRET=<openssl rand -hex 32 결과>
 SERVE_STATIC=false
