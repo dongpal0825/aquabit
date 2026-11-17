@@ -505,6 +505,11 @@
       li.innerHTML = `<span class="who">${esc(m.nickname)}</span>${esc(m.body)}<time datetime="${m.createdAt}">${Aqua.fmtTime(m.createdAt)}</time>`;
       chatList.appendChild(li);
       if (!state.chatOpen && m.userId !== user.id && state.chatLoaded) state.unread++;
+      // 새로 온 채팅은 보낸 사람 물고기 위에 말풍선으로 (처음 불러온 기록은 제외)
+      if (state.chatLoaded) {
+        const f = state.fish.find((x) => x.userId === m.userId);
+        if (f) scene.say(f.id, m.body);
+      }
     }
     while (chatList.children.length > 200) chatList.firstChild.remove();
     if (atBottom || msgs.some((m) => m.userId === user.id)) chatList.scrollTop = chatList.scrollHeight;

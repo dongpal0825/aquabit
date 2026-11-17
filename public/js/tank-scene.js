@@ -40,6 +40,7 @@
       this.pellets = [];         // 떨어지는 먹이
       this.fx = [];              // 반짝이 등 짧은 효과
       this.texts = [];           // 떠오르는 글자 (냠!)
+      this.speech = new Map();   // 물고기 id → 채팅 말풍선 { text, age, life }
       this.quality = 1;          // 1 보통, 0 가볍게 (느린 컴퓨터에서 자동 전환)
       this._slowTime = 0;
       this.kelp = [];
@@ -245,6 +246,15 @@
       this.texts.push({ x: f.x, y: f.y - s.h / 2, text, age: 0, life: 1.1 });
     }
 
+    /** 채팅 말풍선: 물고기 위에 잠깐 떴다가 사라진다 (물고기마다 하나, 새 말이 오면 바꿔 씀) */
+    say(fishId, text, seconds) {
+      if (!this.fish.has(fishId)) return;
+      const t = String(text).replace(/\s+/g, ' ').trim();
+      if (!t) return;
+      const life = seconds || Math.min(7, 3.5 + t.length * 0.08); // 긴 말은 조금 더 오래
+      this.speech.set(fishId, { text: t, age: 0, life });
+    }
+
     /** 성장할 때 물고기가 하얗게 깜빡인다 */
     flash(fishId, seconds = 1.2) {
       const f = this.fish.get(fishId);
@@ -322,6 +332,10 @@
       }
       this.pellets = this.pellets.filter((p) => !p.eaten);
 
+      for (const [id, sp] of this.speech) {
+        sp.age += dt;
+        if (sp.age >= sp.life || !this.fish.has(id)) this.speech.delete(id);
+      }
       for (const t of this.texts) t.age += dt;
       this.texts = this.texts.filter((t) => t.age < t.life);
 
@@ -530,7 +544,10 @@
           o.fillText(label, Math.round(cx), Math.round(bottom + 11.5));
         }
 
-        if (d.status === 'hungry' && !f.chase) {
+        const sp = this.speech.get(f.id);
+        if (sp) {
+          this._drawSpeech(o, cx, top, sp, f.id === this.selectedId);
+        } else if (d.status === 'hungry' && !f.chase) {
           const msg = '배고파요';
           o.font = '12px Galmuri9, Galmuri11, monospace';
           const tw = o.measureText(msg).width + 14;
@@ -545,7 +562,7 @@
           o.fillRect(bx + 12, by + 22, 2, 2);
           o.fillText(msg, bx + tw / 2, by + 10.5);
         }
-        if (d.status === 'sad') {
+        if (d.status === 'sad' && !sp) {
           o.font = '11px Galmuri9, monospace';
           o.fillStyle = 'rgba(16,54,92,0.7)';
           o.fillText('…', Math.round(cx + 16), Math.round(top - 4));
@@ -564,6 +581,67 @@
         o.globalAlpha = 1;
       }
       void k;
+    }
+
+    /** 글자를 maxW 안에 줄바꿈 (최대 3줄, 넘치면 …) */
+    _wrap(o, text, maxW, maxLines) {
+      // 띄어쓰기 단위로 줄을 나누고, 한 단어가 한 줄보다 길 때만 글자 단위로 자른다
+      const lines = [];
+      let line = '';
+      let overflow = false;
+      const push = (l) => { if (lines.length < maxLines) lines.push(l); else overflow = true; };
+      for (const word of text.split(' ')) {
+        const tryLine = line ? line + ' ' + word : word;
+        if (o.measureText(tryLine).width <= maxW) { line = tryLine; continue; }
+        if (line) { push(line); line = ''; }
+        if (o.measureText(word).width <= maxW) { line = word; continue; }
+        for (const ch of word) {
+          if (o.measureText(line + ch).width > maxW && line) { push(line); line = ''; }
+          line += ch;
+        }
+      }
+      if (line) push(line);
+      if (overflow && lines.length) {
+        let last = lines[lines.length - 1];
+        while (last && o.measureText(last + '…').width > maxW) last = last.slice(0, -1);
+        lines[lines.length - 1] = last.replace(/\s+$/, '') + '…';
+      }
+      return lines;
+    }
+
+    _drawSpeech(o, cx, top, sp, selected) {
+      o.font = '13px "IBM Plex Sans KR", "Malgun Gothic", sans-serif';
+      const lines = this._wrap(o, sp.text, 170, 3);
+      const lineH = 18;
+      const w = Math.ceil(Math.max(...lines.map((l) => o.measureText(l).width))) + 18;
+      const h = lines.length * lineH + 10;
+      // 화면 밖으로 나가지 않게
+      let bx = Math.round(Math.min(Math.max(6, cx - w / 2), this.cssW - w - 6));
+      const by = Math.round(Math.max(6, top - h - 14));
+      // 나타날 때 톡 튀고, 사라질 때 흐려짐
+      const p = sp.age / sp.life;
+      o.globalAlpha = p > 0.85 ? (1 - p) / 0.15 : 1;
+      const pop = sp.age < 0.12 ? 3 : 0;
+      // 픽셀 테두리 (모서리 한 칸 깎기)
+      o.fillStyle = '#10365c';
+      o.fillRect(bx + 2, by - 2 - pop, w - 4, h + 4);
+      o.fillRect(bx, by - pop, w, h);
+      o.fillStyle = selected ? '#fff2c2' : '#ffffff';
+      o.fillRect(bx + 2, by - pop, w - 4, h);
+      // 꼬리 (물고기 쪽을 가리킴)
+      const tx = Math.round(Math.min(Math.max(bx + 10, cx - 4), bx + w - 18));
+      o.fillStyle = '#10365c';
+      o.fillRect(tx - 2, by + h - pop, 12, 4);
+      o.fillRect(tx, by + h + 4 - pop, 6, 4);
+      o.fillStyle = selected ? '#fff2c2' : '#ffffff';
+      o.fillRect(tx, by + h - pop, 8, 2);
+      o.fillRect(tx + 2, by + h + 2 - pop, 2, 4);
+      // 글자
+      o.fillStyle = '#10365c';
+      o.textAlign = 'left';
+      lines.forEach((l, i) => o.fillText(l, bx + 9, by + 5 + lineH / 2 + i * lineH - pop + 1));
+      o.textAlign = 'center';
+      o.globalAlpha = 1;
     }
 
     // ── 입력 ─────────────────────────────────
