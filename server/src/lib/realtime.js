@@ -25,4 +25,14 @@ async function attendance(userId, payload) {
   }
 }
 
-module.exports = { init, toTank, toUser, attendance };
+/** 이 사람의 연결들을 어항 방에서 빼기 (어항을 나갔을 때) */
+function leaveTankRoom(userId, tankId) {
+  if (io) io.in(`user:${userId}`).socketsLeave(`tank:${tankId}`);
+}
+
+/** 어항 방을 닫기 (어항이 삭제됐을 때) */
+function closeTankRoom(tankId) {
+  if (io) io.in(`tank:${tankId}`).socketsLeave(`tank:${tankId}`);
+}
+
+module.exports = { init, toTank, toUser, attendance, leaveTankRoom, closeTankRoom };

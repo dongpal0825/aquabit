@@ -105,6 +105,36 @@
 - `fedToday`: 오늘(한국 시간) 받은 먹이 수, 하루 최대 5
 - `pendingTasks`: 내가 처리할 과제 수 (대표: 검토 대기, 팀원: 할 일 + 반려됨). 액션 바의 빨간 배지
 
+### POST /api/tanks/:tankId/leave
+어항 나가기 (팀원만). 대표는 400 `OWNER_CANNOT_LEAVE` (먼저 대표를 넘기거나 어항 삭제).
+
+- 내 물고기와 먹이 기록이 지워지고, 내가 맡은 **끝나지 않은** 과제(todo, submitted, rejected)도 지워집니다.
+- 승인된 과제, 채팅, 진주/먹이/장신구와 진주 내역은 남습니다.
+
+응답: `{ "ok": true, "removedTasks": 1 }` / 소켓 `member:left`
+
+### POST /api/tanks/:tankId/transfer
+대표 넘기기 (대표만, 이 어항의 다른 팀원에게).
+
+```json
+{ "userId": 2 }
+```
+- 대표는 자기 자신에게 과제를 줄 수 없으므로, 새 대표가 맡고 있던 끝나지 않은 과제는 지워집니다.
+- 넘긴 사람은 일반 팀원이 되어 어항을 나갈 수 있습니다.
+
+응답: `{ "ok": true, "ownerId": 2, "removedTasks": 0 }` / 소켓 `tank:owner-changed`
+
+### DELETE /api/tanks/:tankId
+어항 삭제 (대표만). 실수 방지를 위해 어항 이름을 그대로 보내야 합니다 (다르면 400 `CONFIRM_MISMATCH`).
+
+```json
+{ "confirmName": "클라우드 7팀" }
+```
+- 멤버, 물고기, 먹이 기록, 채팅, 과제가 함께 지워집니다 (FK ON DELETE CASCADE).
+- 각자의 진주와 진주 내역은 남고, 내역의 어항 이름만 비워집니다.
+
+응답: `{ "ok": true }` / 소켓 `tank:deleted` (다른 팀원 화면은 목록으로 이동)
+
 ---
 
 ## 물고기
@@ -279,6 +309,9 @@
 |---|---|---|
 | `chat:message` | `{ id, userId, nickname, body, createdAt }` | 채팅 추가 |
 | `member:joined` | `{ userId, nickname }` | "지우님이 어항에 들어왔어요!" |
+| `member:left` | `{ userId, nickname, removedTasks }` | "지우님이 어항을 나갔어요." |
+| `tank:owner-changed` | `{ fromUserId, fromNickname, toUserId, toNickname, removedTasks }` | "수빈님이 새 대표가 됐어요." (받은 사람에게는 안내) |
+| `tank:deleted` | `{ tankName, byUserId, byNickname }` | 목록으로 이동하며 "민규님이 클라우드 7팀 어항을 삭제했어요." |
 | `fish:fed` | `{ feederId, feederNickname, fish, wasStatus }` | 먹이가 떨어지고 물고기가 먹음. "민규님이 수빈님의 물고기에게 먹이를 줬어요!" |
 | `fish:grew` | `{ feederId, fish, stage, stageName }` | 반짝임 + "수빈님의 물고기가 어른 물고기로 성장했어요!" (내 물고기면 LEVEL UP!) |
 | `fish:updated` | `{ fish }` | 꾸미기 반영 |

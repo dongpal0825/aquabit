@@ -15,6 +15,17 @@
       () => Fx.bumpNumber(document.getElementById('pearlCount'), r.pearls));
   }).catch(() => {});
 
+  // 어항을 나가거나 삭제하고 돌아왔을 때 안내
+  try {
+    const notice = sessionStorage.getItem('aquabit.notice');
+    if (notice) {
+      sessionStorage.removeItem('aquabit.notice');
+      const n = document.getElementById('notice');
+      n.textContent = notice;
+      n.hidden = false;
+    }
+  } catch (e) { /* 무시 */ }
+
   const grid = document.getElementById('tankGrid');
   const empty = document.getElementById('emptyMsg');
 

@@ -1,7 +1,7 @@
 const express = require('express');
 const crypto = require('crypto');
 const { pool, tx } = require('../db');
-const { wrap, bad, notFound } = require('../lib/http');
+const { wrap, bad, forbidden, notFound } = require('../lib/http');
 const { requireAuth, requireMember } = require('../lib/auth');
 const { SPECIES, COLORS, MAX_MEMBERS, fishView, kstDate } = require('../lib/game');
 const realtime = require('../lib/realtime');
@@ -147,6 +147,67 @@ router.get('/:tankId', requireMember, wrap(async (req, res) => {
     pendingTasks: await require('./tasks').pendingCount(pool, t.id, req.session.userId, req.isOwner),
     serverTime: new Date().toISOString(),
   });
+}));
+
+// 어항 나가기 (팀원만. 대표는 먼저 대표를 넘기거나 어항을 삭제해야 함)
+// 내 물고기는 사라지고, 끝나지 않은 내 과제는 지운다. 승인된 과제와 채팅, 진주 내역은 남는다.
+router.post('/:tankId/leave', requireMember, wrap(async (req, res) => {
+  const userId = req.session.userId;
+  if (req.isOwner) throw bad('대표는 어항을 나갈 수 없어요. 팀 메뉴에서 대표를 넘기거나 어항을 삭제해 주세요.', 'OWNER_CANNOT_LEAVE');
+  const tankId = req.tank.id;
+  const removedTasks = await tx(async (conn) => {
+    await conn.query('SELECT id FROM tanks WHERE id = ? FOR UPDATE', [tankId]);
+    const [r] = await conn.query(
+      "DELETE FROM tasks WHERE tank_id = ? AND assignee_id = ? AND status <> 'approved'", [tankId, userId]
+    );
+    await conn.query('DELETE FROM fish WHERE tank_id = ? AND user_id = ?', [tankId, userId]);
+    await conn.query('DELETE FROM tank_members WHERE tank_id = ? AND user_id = ?', [tankId, userId]);
+    return r.affectedRows;
+  });
+  const [[u]] = await pool.query('SELECT nickname FROM users WHERE id = ?', [userId]);
+  realtime.toTank(tankId, 'member:left', { userId, nickname: u.nickname, removedTasks });
+  realtime.leaveTankRoom(userId, tankId);
+  res.json({ ok: true, removedTasks });
+}));
+
+// 대표 넘기기 (대표만, 이 어항의 다른 팀원에게)
+router.post('/:tankId/transfer', requireMember, wrap(async (req, res) => {
+  if (!req.isOwner) throw forbidden('대표만 대표를 넘길 수 있어요.');
+  const toId = Number(req.body.userId);
+  if (toId === req.session.userId) throw bad('이미 대표예요.');
+  const tankId = req.tank.id;
+  const [[m]] = await pool.query(
+    'SELECT u.nickname FROM tank_members tm JOIN users u ON u.id = tm.user_id WHERE tm.tank_id = ? AND tm.user_id = ?',
+    [tankId, toId]
+  );
+  if (!m) throw bad('이 어항의 팀원에게만 넘길 수 있어요.');
+  // 새 대표에게 맡겨져 있던 과제는 대표가 자기 과제를 승인하게 되므로, 끝나지 않은 것은 지운다
+  const removedTasks = await tx(async (conn) => {
+    await conn.query('UPDATE tanks SET owner_id = ? WHERE id = ?', [toId, tankId]);
+    const [r] = await conn.query(
+      "DELETE FROM tasks WHERE tank_id = ? AND assignee_id = ? AND status <> 'approved'", [tankId, toId]
+    );
+    return r.affectedRows;
+  });
+  const [[from]] = await pool.query('SELECT nickname FROM users WHERE id = ?', [req.session.userId]);
+  realtime.toTank(tankId, 'tank:owner-changed', {
+    fromUserId: req.session.userId, fromNickname: from.nickname, toUserId: toId, toNickname: m.nickname, removedTasks,
+  });
+  res.json({ ok: true, ownerId: toId, removedTasks });
+}));
+
+// 어항 삭제 (대표만, 확인용으로 어항 이름을 그대로 보내야 함)
+// 멤버, 물고기, 채팅, 과제가 함께 지워진다. 진주 내역은 남고 어항 이름만 비워진다.
+router.delete('/:tankId', requireMember, wrap(async (req, res) => {
+  if (!req.isOwner) throw forbidden('어항은 대표만 삭제할 수 있어요.');
+  const confirmName = String(req.body.confirmName || '').trim();
+  if (confirmName !== req.tank.name) throw bad('확인을 위해 어항 이름을 정확히 입력해 주세요.', 'CONFIRM_MISMATCH');
+  const tankId = req.tank.id;
+  const [[from]] = await pool.query('SELECT nickname FROM users WHERE id = ?', [req.session.userId]);
+  await pool.query('DELETE FROM tanks WHERE id = ?', [tankId]); // FK ON DELETE CASCADE
+  realtime.toTank(tankId, 'tank:deleted', { tankName: req.tank.name, byNickname: from.nickname, byUserId: req.session.userId });
+  realtime.closeTankRoom(tankId);
+  res.json({ ok: true });
 }));
 
 module.exports = router;

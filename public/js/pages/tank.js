@@ -76,7 +76,7 @@
     try {
       data = await Aqua.api(`/tanks/${tankId}`);
     } catch (e) {
-      if (e.status === 404) { alert(e.message); location.replace('/tanks.html'); }
+      if (e.status === 404) goToList('이 어항은 삭제됐거나 더 이상 참여하고 있지 않아요.');
       return;
     }
     if (!first && !realtimeOn()) {
@@ -470,8 +470,124 @@
         <span>${f ? `${esc(f.name)}, ${f.stage}단계 ${f.stageName}, ${STATUS_LABEL[f.status]}` : ''}</span></span>
         ${m.isOwner ? '<span class="tag tag--sand">대표</span>' : ''}`;
       if (f) li.querySelector('.mfish').appendChild(PA.previewCanvas(f, 2, 0));
+      // 대표: 다른 팀원에게 대표 넘기기
+      if (state.me.isOwner && m.userId !== user.id) {
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'btn btn--small btn--foam member-transfer';
+        b.textContent = '대표 넘기기';
+        b.addEventListener('click', () => confirmTransfer(m));
+        li.appendChild(b);
+      }
       list.appendChild(li);
     }
+
+    // 맨 아래: 대표는 어항 삭제, 팀원은 어항 나가기
+    const danger = $('teamDanger');
+    danger.innerHTML = '';
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'btn btn--small btn--coral';
+    if (state.me.isOwner) {
+      danger.insertAdjacentHTML('beforeend', '<p>대표는 어항을 나갈 수 없어요. 나가려면 먼저 다른 팀원에게 대표를 넘겨 주세요.</p>');
+      b.textContent = '어항 삭제';
+      b.addEventListener('click', confirmDelete);
+    } else {
+      danger.insertAdjacentHTML('beforeend', '<p>어항을 나가면 이 어항의 내 물고기가 사라져요.</p>');
+      b.textContent = '어항 나가기';
+      b.addEventListener('click', confirmLeave);
+    }
+    danger.appendChild(b);
+  }
+
+  // ── 확인 대화상자 ──
+  /** opts: { title, body(html), ok, requireText, requireLabel, onOk: async () => {} } */
+  function confirmAction(opts) {
+    const d = $('confirmDialog');
+    $('confirmTitle').textContent = opts.title;
+    $('confirmBody').innerHTML = opts.body;
+    $('confirmOk').textContent = opts.ok;
+    $('confirmError').textContent = '';
+    const field = $('confirmField');
+    const input = $('confirmInput');
+    field.hidden = !opts.requireText;
+    input.value = '';
+    if (opts.requireText) {
+      $('confirmLabel').textContent = opts.requireLabel;
+      input.placeholder = opts.requireText;
+    }
+    const okBtn = $('confirmOk');
+    okBtn.disabled = !!opts.requireText;
+    input.oninput = () => { okBtn.disabled = input.value.trim() !== opts.requireText; };
+    $('confirmForm').onsubmit = async (e) => {
+      if (!e.submitter || e.submitter.value !== 'ok') return; // 취소는 그냥 닫힘
+      e.preventDefault();
+      okBtn.disabled = true;
+      try {
+        await opts.onOk(input.value.trim());
+        d.close();
+      } catch (ex) {
+        $('confirmError').textContent = ex.message;
+        okBtn.disabled = !!opts.requireText && input.value.trim() !== opts.requireText;
+      }
+    };
+    d.showModal();
+    (opts.requireText ? input : $('confirmForm').querySelector('[value=cancel]')).focus();
+  }
+
+  function goToList(message) {
+    try { sessionStorage.setItem('aquabit.notice', message); } catch (e) { /* 무시 */ }
+    location.replace('/tanks.html');
+  }
+
+  function confirmTransfer(m) {
+    confirmAction({
+      title: '대표 넘기기',
+      body: `<p><b>${esc(m.nickname)}</b>님에게 대표를 넘길까요?</p>
+        <ul><li>과제 등록, 승인, 반려는 이제 ${esc(m.nickname)}님이 해요.</li>
+        <li>${esc(m.nickname)}님이 맡고 있던 끝나지 않은 과제는 지워져요.</li>
+        <li>넘긴 뒤에는 나도 일반 팀원이 되어 어항을 나갈 수 있어요.</li></ul>`,
+      ok: '대표 넘기기',
+      onOk: async () => {
+        await Aqua.api(`/tanks/${tankId}/transfer`, { method: 'POST', body: { userId: m.userId } });
+        $('teamDialog').close();
+        toast(`<b>${esc(m.nickname)}</b>님에게 대표를 넘겼어요.`);
+        await loadTank(false);
+        if (window.AquaTasks) window.AquaTasks.refresh();
+      },
+    });
+  }
+
+  function confirmLeave() {
+    const mf = myFish();
+    confirmAction({
+      title: '어항 나가기',
+      body: `<p><b>${esc(state.tank.name)}</b> 어항을 나갈까요?</p>
+        <ul><li>이 어항의 내 물고기${mf ? ` <b>${esc(mf.name)}</b>${Aqua.josa(mf.name, '이', '가').slice(mf.name.length)}` : '가'} 사라져요. 다시 들어오면 아기 물고기부터 시작해요.</li>
+        <li>내가 맡은 과제 중 끝나지 않은 것은 지워져요.</li>
+        <li>진주, 먹이, 장신구, 진주 내역은 그대로 남아요.</li></ul>`,
+      ok: '나가기',
+      onOk: async () => {
+        await Aqua.api(`/tanks/${tankId}/leave`, { method: 'POST' });
+        goToList(`${state.tank.name} 어항에서 나왔어요.`);
+      },
+    });
+  }
+
+  function confirmDelete() {
+    confirmAction({
+      title: '어항 삭제',
+      body: `<p><b>${esc(state.tank.name)}</b> 어항을 삭제할까요? <b>되돌릴 수 없어요.</b></p>
+        <ul><li>팀원 ${state.members.length}명의 물고기, 채팅, 과제가 모두 지워져요.</li>
+        <li>각자의 진주, 먹이, 장신구와 진주 내역은 남아요.</li></ul>`,
+      ok: '삭제하기',
+      requireText: state.tank.name,
+      requireLabel: '확인을 위해 어항 이름을 입력해 주세요',
+      onOk: async (typed) => {
+        await Aqua.api(`/tanks/${tankId}`, { method: 'DELETE', body: { confirmName: typed } });
+        goToList(`${state.tank.name} 어항을 삭제했어요.`);
+      },
+    });
   }
   $('actTeam').addEventListener('click', () => { setFeedMode(false); renderTeam(); $('teamDialog').showModal(); });
   $('copyInvite').addEventListener('click', async (e) => {
@@ -574,7 +690,7 @@
   // 다른 파일(과제 보드, 실시간)에서 쓰는 도구
   window.AquaTank = {
     state, scene, toast, esc, loadTank, loadWallet, upsertFish, appendMessages, rewardPearls,
-    setPearls, setFood, renderTaskBadge, nickOf, fishById, tankId, user,
+    setPearls, setFood, renderTaskBadge, nickOf, fishById, tankId, user, goToList,
   };
 
   // ── 시작 ──

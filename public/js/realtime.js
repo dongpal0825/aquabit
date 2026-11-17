@@ -44,6 +44,27 @@
       T.loadTank(false);
     });
 
+    // 나가기, 대표 넘기기, 삭제
+    socket.on('member:left', (p) => {
+      if (p.userId === me) return;
+      T.toast(`<b>${esc(p.nickname)}</b>님이 어항을 나갔어요.`);
+      T.loadTank(false);
+      if (window.AquaTasks) window.AquaTasks.refresh();
+    });
+    socket.on('tank:owner-changed', (p) => {
+      if (p.fromUserId !== me) {
+        T.toast(p.toUserId === me
+          ? `<b>${esc(p.fromNickname)}</b>님이 나에게 대표를 넘겼어요. 이제 과제를 등록하고 승인할 수 있어요.`
+          : `<b>${esc(p.toNickname)}</b>님이 새 대표가 됐어요.`, 5000);
+      }
+      T.loadTank(false);
+      if (window.AquaTasks) window.AquaTasks.refresh();
+    });
+    socket.on('tank:deleted', (p) => {
+      if (p.byUserId === me) return; // 내가 지운 건 이미 목록으로 이동 중
+      T.goToList(`${p.byNickname}님이 ${p.tankName} 어항을 삭제했어요.`);
+    });
+
     // 먹이 주기: 다른 사람이 준 먹이는 그 물고기 위에서 떨어뜨려 보여 준다
     socket.on('fish:fed', (p) => {
       if (p.feederId === me) return; // 내가 준 건 이미 연출함

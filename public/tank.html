@@ -180,7 +180,27 @@
       </div>
       <p class="team-count pixel" id="teamCount"></p>
       <ul class="member-list" id="memberList"></ul>
+      <div class="team-danger" id="teamDanger"></div>
     </div>
+  </dialog>
+
+  <!-- 확인 (어항 삭제, 나가기, 대표 넘기기) -->
+  <dialog class="sheet sheet--small panel" id="confirmDialog" aria-labelledby="confirmTitle">
+    <form method="dialog" class="sheet-inner" id="confirmForm" novalidate>
+      <header class="sheet-head">
+        <h2 class="sheet-title pixel" id="confirmTitle"></h2>
+      </header>
+      <div class="confirm-body" id="confirmBody"></div>
+      <div class="field" id="confirmField" hidden>
+        <label for="confirmInput" id="confirmLabel"></label>
+        <input class="input" id="confirmInput" autocomplete="off">
+      </div>
+      <p class="form-error" role="alert" id="confirmError"></p>
+      <footer class="sheet-foot">
+        <button class="btn btn--foam" value="cancel" type="submit" formnovalidate>취소</button>
+        <button class="btn btn--coral" id="confirmOk" value="ok" type="submit"></button>
+      </footer>
+    </form>
   </dialog>
 
   <!-- 설정 -->
