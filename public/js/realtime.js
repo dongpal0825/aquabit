@@ -14,7 +14,8 @@
     const me = T.user.id;
     if (typeof io !== 'function') { console.warn('Socket.IO 스크립트를 못 불러와서 폴링으로 동작해요.'); return; }
 
-    socket = io({ path: '/socket.io', transports: ['websocket', 'polling'] });
+    // Vercel 함수는 WebSocket 전송만 쓴다 (폴링 전송은 요청마다 다른 인스턴스로 갈 수 있어 끊김)
+    socket = io({ path: '/socket.io', transports: ['websocket'] });
 
     socket.on('connect', () => {
       socket.emit('tank:join', T.tankId, async (res) => {

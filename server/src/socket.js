@@ -10,6 +10,21 @@ function attachSocket(server, sessionMiddleware) {
     cors: { origin: false }, // 같은 출처에서만
   });
 
+  // Vercel처럼 서버(함수 인스턴스)가 여러 개 뜨는 곳에서는 Redis로 서로의 방 메시지를 전달한다.
+  // REDIS_URL(또는 Vercel 마켓플레이스 Upstash가 넣어 주는 KV_URL)이 있을 때만 켠다.
+  const redisUrl = process.env.REDIS_URL || process.env.KV_URL;
+  if (redisUrl) {
+    const { createClient } = require('redis');
+    const { createAdapter } = require('@socket.io/redis-adapter');
+    const pub = createClient({ url: redisUrl });
+    const sub = pub.duplicate();
+    for (const c of [pub, sub]) c.on('error', (e) => console.error('[redis]', e.message));
+    io.adapter(createAdapter(pub, sub));
+    Promise.all([pub.connect(), sub.connect()])
+      .then(() => console.log('[socket] Redis 어댑터 연결됨'))
+      .catch((e) => console.error('[socket] Redis 연결 실패, 이 인스턴스 안에서만 전달됨:', e.message));
+  }
+
   // express-session 쿠키로 사용자 확인
   io.engine.use(sessionMiddleware);
 

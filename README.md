@@ -106,3 +106,5 @@ npm start                   # http://localhost:3000
 5. ✅ 어항 화면 게임 연출과 효과
 
 API와 Socket.IO 이벤트는 [docs/api.md](docs/api.md), 서버 배포는 [docs/deploy.md](docs/deploy.md), 실습실 PC에서 실행하는 방법은 [docs/lab-setup.md](docs/lab-setup.md), 실습실 web VM 배포 순서표는 [docs/lab-deploy-checklist.md](docs/lab-deploy-checklist.md), 링크로 공유하는 Vercel 배포는 [docs/vercel.md](docs/vercel.md)를 보세요.
+
+> 이 `vercel` 브랜치는 Vercel 공유용입니다 ([docs/vercel.md](docs/vercel.md)). 실습실 Rocky Linux VM에는 `main` 브랜치를 쓰세요.

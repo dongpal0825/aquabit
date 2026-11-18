@@ -5,14 +5,14 @@
   "installCommand": "cd server && npm install --omit=dev",
   "buildCommand": "",
   "outputDirectory": "public",
-  "cleanUrls": false,
   "rewrites": [
-    { "source": "/api/:path*", "destination": "/api" }
+    { "source": "/api/:path*", "destination": "/api" },
+    { "source": "/socket.io/:path*", "destination": "/api" }
   ],
   "functions": {
     "api/index.js": {
       "includeFiles": "server/src/**",
-      "maxDuration": 30
+      "maxDuration": 300
     }
   }
 }
