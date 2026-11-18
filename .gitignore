@@ -6,3 +6,7 @@ shots/
 # 로컬 도구 설정, 작업용 파일
 .claude/
 *.zip
+
+# 개인 메모 (비밀번호)
+key.txt
+*.key.txt
