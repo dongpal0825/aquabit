@@ -1,6 +1,0 @@
-server/node_modules
-server/.env
-sql/*.local.sql
-shots
-.claude
-*.zip

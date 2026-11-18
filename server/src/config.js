@@ -27,13 +27,5 @@ module.exports = {
     user: process.env.DB_USER || 'aquabit',
     password: process.env.DB_PASSWORD || '',
     database: process.env.DB_NAME || 'aquabit',
-    // 클라우드 DB(TiDB Cloud, Aiven 등)는 암호화 연결 필수. DB_SSL_CA는 자체 인증서를 쓰는 곳(Aiven)만 필요
-    ...(process.env.DB_SSL === 'true' && {
-      ssl: {
-        minVersion: 'TLSv1.2',
-        rejectUnauthorized: true,
-        ...(process.env.DB_SSL_CA && { ca: process.env.DB_SSL_CA.replace(/\\n/g, '\n') }),
-      },
-    }),
   },
 };
