@@ -105,4 +105,6 @@ npm start                   # http://localhost:3000
 4. ✅ Socket.IO 실시간 전환 (끊기면 자동으로 폴링)
 5. ✅ 어항 화면 게임 연출과 효과
 
-API와 Socket.IO 이벤트는 [docs/api.md](docs/api.md), 서버 배포는 [docs/deploy.md](docs/deploy.md), 실습실 PC에서 실행하는 방법은 [docs/lab-setup.md](docs/lab-setup.md)를 보세요.
+API와 Socket.IO 이벤트는 [docs/api.md](docs/api.md), 서버 배포는 [docs/deploy.md](docs/deploy.md), 실습실 PC에서 실행하는 방법은 [docs/lab-setup.md](docs/lab-setup.md), 실습실 web VM 배포 순서표는 [docs/lab-deploy-checklist.md](docs/lab-deploy-checklist.md)를 보세요.
+
+> 이 `main` 브랜치는 실습실 Rocky Linux VM용입니다. 링크로 공유하기 위한 Vercel용 코드는 [`vercel` 브랜치](https://github.com/dongpal0825/aquabit/tree/vercel)에 따로 있습니다.
