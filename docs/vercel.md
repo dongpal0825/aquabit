@@ -129,6 +129,7 @@ Vercel은 접속이 늘면 함수 인스턴스를 여러 개 띄웁니다. 철�
 ## 8. 이후
 
 - Vercel용 수정은 `vercel` 브랜치에서 하고 push하면 자동 배포됩니다.
+- 서버 라이브러리(`server/package.json`의 dependencies)를 추가하거나 바꾸면 **루트 `package.json`에도 똑같이** 넣어야 합니다. Vercel은 루트에서 설치하기 때문입니다 (빠지면 Logs에 `Cannot find module`).
 - `main`의 기능 수정을 Vercel에도 반영하려면:
 
 ```powershell
@@ -146,6 +147,7 @@ git checkout main
 | 증상 | 확인 |
 |---|---|
 | `/api/health`가 500 / `FUNCTION_INVOCATION_FAILED` | 프로젝트 → **Logs**. 대부분 DB 환경 변수 오타 |
+| Logs에 `Cannot find module ...` | 루트 `package.json`의 dependencies에 그 라이브러리가 있는지 |
 | `/api/...`가 404 | Production이 `vercel` 브랜치로 배포됐는지 (5번) |
 | 로그인 후 바로 로그인 화면으로 | `SESSION_SECRET`, 2번 db:init 여부 |
 | 채팅이 실시간으로 안 오고 2~5초 늦음 | WebSocket 연결 실패 후 폴링으로 동작 중. F12 → Console의 오류, Logs의 `[socket]`/`[redis]` 줄 확인 |
