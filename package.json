@@ -1,0 +1,16 @@
+{
+  "name": "aquabit-vercel",
+  "private": true,
+  "description": "Vercel 배포용: server/package.json과 같은 의존성 (Vercel이 루트에서 설치하도록)",
+  "dependencies": {
+    "@socket.io/redis-adapter": "^8.3.0",
+    "bcrypt": "^6.0.0",
+    "dotenv": "^18.0.10",
+    "express": "^4.22.3",
+    "express-mysql-session": "^3.0.3",
+    "express-session": "^1.19.0",
+    "mysql2": "^3.24.6",
+    "redis": "^6.3.1",
+    "socket.io": "^4.8.4"
+  }
+}

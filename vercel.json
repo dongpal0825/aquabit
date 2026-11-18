@@ -1,17 +1,24 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": null,
-  "regions": ["icn1"],
-  "installCommand": "cd server && npm install --omit=dev",
+  "regions": [
+    "icn1"
+  ],
   "buildCommand": "",
   "outputDirectory": "public",
   "rewrites": [
-    { "source": "/api/:path*", "destination": "/api" },
-    { "source": "/socket.io/:path*", "destination": "/api" }
+    {
+      "source": "/api/:path*",
+      "destination": "/api"
+    },
+    {
+      "source": "/socket.io/:path*",
+      "destination": "/api"
+    }
   ],
   "functions": {
     "api/index.js": {
-      "includeFiles": "server/**",
+      "includeFiles": "{server/src/**,node_modules/bcrypt/prebuilds/linux-x64/**,node_modules/socket.io/client-dist/**}",
       "maxDuration": 300
     }
   }
