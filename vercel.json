@@ -8,11 +8,11 @@
   "outputDirectory": "public",
   "rewrites": [
     {
-      "source": "/api/:path*",
+      "source": "/api/(.*)",
       "destination": "/api"
     },
     {
-      "source": "/socket.io/:path*",
+      "source": "/socket.io/(.*)",
       "destination": "/api"
     }
   ],
