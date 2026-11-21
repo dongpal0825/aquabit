@@ -6,8 +6,8 @@ const data = require('../lib/data');
 const router = express.Router();
 const PAGE_SIZE = 10;
 
-router.get('/', (req, res) => {
-  const all = data.getNotices();
+router.get('/', async (req, res) => {
+  const all = await data.getNotices();
   const category = Object.hasOwn(data.NOTICE_CATEGORIES, req.query.category) ? req.query.category : '';
   const filtered = category ? all.filter((n) => n.category === category) : all;
 
@@ -26,10 +26,10 @@ router.get('/', (req, res) => {
   });
 });
 
-router.get('/:id', (req, res, next) => {
+router.get('/:id', async (req, res, next) => {
   if (!/^\d{1,9}$/.test(req.params.id)) return next(); // 404로
   const id = Number(req.params.id);
-  const all = data.getNotices(); // 최신순
+  const all = await data.getNotices(); // 최신순
   const index = all.findIndex((n) => n.id === id);
   if (index === -1) return next();
 

@@ -5,10 +5,10 @@ const data = require('../lib/data');
 
 const router = express.Router();
 
-router.get('/', (req, res) => {
+router.get('/', async (req, res) => {
   res.render('index', {
     pageTitle: null,
-    latestNotices: data.getNotices().slice(0, 3),
+    latestNotices: (await data.getNotices()).slice(0, 3),
   });
 });
 

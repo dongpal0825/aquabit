@@ -175,7 +175,7 @@ npm start
 
 | 바꿀 것 | 파일 |
 |---|---|
-| 공지 | `data/notices.json` (`category`: `notice` / `update` / `maintenance` / `event`) |
+| 공지 | **관리자 화면 → 홈페이지 공지** 탭에서 추가·수정·삭제 (DB `site_notices`). DB를 쓰지 않을 때만 `data/notices.json`을 읽고, DB를 처음 만들 때 이 파일의 공지를 가져옴 |
 | 채용 공고 | `data/careers.json` |
 | FAQ | `data/faq.json` |
 | 팀 역할 | `data/team.json` (`icon`: server, globe, code, mail / `color`: coral, yellow, mint, violet) |

@@ -42,3 +42,6 @@ shots/
 .DS_Store
 Thumbs.db
 desktop.ini
+
+# 개인 문서 (일일 보고서 등)
+일일 보고서/

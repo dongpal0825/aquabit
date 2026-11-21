@@ -311,6 +311,10 @@
 | DELETE | `/admin/tanks/:id` | 어항 삭제 (이름 확인 없음). 소켓 `tank:deleted` |
 | GET | `/admin/users?q=` | 사용자, 진주, 아이템, 들어간 어항(대표 여부), 마지막 출석. `q`로 아이디/닉네임 검색 |
 | POST | `/admin/users/:id/grant` | `{ pearls?, item?, quantity?, reason? }` 진주 지급(음수면 회수, 잔액보다 많이는 불가), 먹이/장신구 지급. 진주 변동은 transactions에 `admin`으로 기록 |
+| GET | `/admin/site-notices` | 홈페이지 공지 목록 (최신순) `{ notices: [{ id, category, title, body, date }] }` |
+| POST | `/admin/site-notices` | `{ category, title, body, date? }` 홈페이지 공지 추가 (`category`: notice/update/maintenance/event, 제목 1~100자, 본문 1~5000자·한 줄이 한 문단, `date` 없으면 오늘) |
+| PATCH | `/admin/site-notices/:id` | 같은 입력으로 수정 |
+| DELETE | `/admin/site-notices/:id` | 삭제 |
 | DELETE | `/admin/users/:id` | 강제 탈퇴. 관리자 계정은 400 `ADMIN_CANNOT_DELETE`. 처리 내용과 응답은 `DELETE /auth/me`와 같음 |
 | POST | `/admin/notices` | `{ body, tankId? }` 공지. `tankId`가 없으면 모든 어항. 채팅에 관리자 이름으로 남고 소켓 `notice` |
 

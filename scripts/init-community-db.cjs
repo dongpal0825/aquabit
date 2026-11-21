@@ -34,6 +34,19 @@ async function prepareSchema(connection) {
     }
     await connection.query('ALTER TABLE users ADD UNIQUE KEY uq_users_nickname (nickname)');
   }
+
+  // 홈페이지 공지: 표가 비어 있으면 data/notices.json을 같은 번호로 가져온다 (기존 /notices/:id 주소 유지)
+  const [[{ count }]] = await connection.query('SELECT COUNT(*) AS count FROM site_notices');
+  if (!count) {
+    let notices = [];
+    try { notices = JSON.parse(await fs.readFile(path.join(__dirname, '../data/notices.json'), 'utf8')); } catch { /* 파일 없음 */ }
+    for (const n of notices.filter((x) => x && Number.isInteger(x.id))) {
+      const body = (Array.isArray(n.body) ? n.body : [n.body]).filter(Boolean).join('\n');
+      await connection.query('INSERT INTO site_notices (id, category, title, body, notice_date) VALUES (?, ?, ?, ?, ?)',
+        [n.id, n.category || 'notice', n.title, body, n.date]);
+    }
+    if (notices.length) console.log(`  홈페이지 공지 ${notices.length}개를 data/notices.json에서 가져왔어요.`);
+  }
 }
 
 async function connect() {

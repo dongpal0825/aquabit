@@ -197,6 +197,48 @@ router.delete('/users/:id', wrap(async (req, res) => {
   res.json({ ok: true, ...(await deleteAccount(id, { by: 'admin' })) });
 }));
 
+// ── 회사 홈페이지 공지사항 (/notices 화면) ──
+const SITE_CATEGORIES = ['notice', 'update', 'maintenance', 'event'];
+function siteNoticeInput(body) {
+  const category = SITE_CATEGORIES.includes(body.category) ? body.category : null;
+  const title = String(body.title || '').trim();
+  const text = String(body.body || '').replace(/\r\n/g, '\n').split('\n').map((l) => l.trim()).filter(Boolean).join('\n');
+  const date = /^\d{4}-\d{2}-\d{2}$/.test(String(body.date || '')) && !Number.isNaN(Date.parse(body.date)) ? body.date : kstDate();
+  if (!category) throw bad('분류를 골라 주세요.');
+  if (title.length < 1 || title.length > 100) throw bad('제목은 1~100자로 써 주세요.');
+  if (text.length < 1 || text.length > 5000) throw bad('본문은 1~5000자로 써 주세요.');
+  return { category, title, body: text, date };
+}
+const siteNoticeView = (r) => ({ id: r.id, category: r.category, title: r.title, body: r.body, date: r.date });
+const SITE_SELECT = "SELECT id, category, title, body, DATE_FORMAT(notice_date, '%Y-%m-%d') AS date FROM site_notices";
+
+router.get('/site-notices', wrap(async (req, res) => {
+  const [rows] = await pool.query(`${SITE_SELECT} ORDER BY notice_date DESC, id DESC`);
+  res.json({ notices: rows.map(siteNoticeView) });
+}));
+
+router.post('/site-notices', wrap(async (req, res) => {
+  const n = siteNoticeInput(req.body);
+  const [r] = await pool.query('INSERT INTO site_notices (category, title, body, notice_date) VALUES (?, ?, ?, ?)', [n.category, n.title, n.body, n.date]);
+  const [[row]] = await pool.query(`${SITE_SELECT} WHERE id = ?`, [r.insertId]);
+  res.status(201).json({ notice: siteNoticeView(row) });
+}));
+
+router.patch('/site-notices/:id', wrap(async (req, res) => {
+  const id = Number(req.params.id);
+  const n = siteNoticeInput(req.body);
+  const [r] = await pool.query('UPDATE site_notices SET category = ?, title = ?, body = ?, notice_date = ? WHERE id = ?', [n.category, n.title, n.body, n.date, id]);
+  if (!r.affectedRows) throw notFound('없는 공지예요.');
+  const [[row]] = await pool.query(`${SITE_SELECT} WHERE id = ?`, [id]);
+  res.json({ notice: siteNoticeView(row) });
+}));
+
+router.delete('/site-notices/:id', wrap(async (req, res) => {
+  const [r] = await pool.query('DELETE FROM site_notices WHERE id = ?', [Number(req.params.id)]);
+  if (!r.affectedRows) throw notFound('없는 공지예요.');
+  res.json({ ok: true });
+}));
+
 router.post('/notices', wrap(async (req, res) => {
   const body = String(req.body.body || '').trim();
   const tankId = req.body.tankId ? Number(req.body.tankId) : null;
