@@ -1,24 +1,16 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": null,
-  "regions": [
-    "icn1"
-  ],
-  "buildCommand": "",
+  "regions": ["icn1"],
+  "installCommand": "npm install",
+  "buildCommand": "npm run build",
   "outputDirectory": "public",
   "rewrites": [
-    {
-      "source": "/api/(.*)",
-      "destination": "/api"
-    },
-    {
-      "source": "/socket.io/(.*)",
-      "destination": "/api"
-    }
+    { "source": "/(.*)", "destination": "/api" }
   ],
   "functions": {
     "api/index.js": {
-      "includeFiles": "{server/src/**,node_modules/bcrypt/prebuilds/linux-x64/**,node_modules/socket.io/client-dist/**}",
+      "includeFiles": "{views/**,data/**,game/domain/**,node_modules/socket.io/client-dist/**}",
       "maxDuration": 300
     }
   }

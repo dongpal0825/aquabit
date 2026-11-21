@@ -1,136 +1,71 @@
-# Vercel로 공유하기 (vercel 브랜치, Windows PC 기준)
+# Vercel로 공유하기 (vercel 브랜치)
 
-이 문서와 Vercel용 코드는 **`vercel` 브랜치**에만 있습니다. `main` 브랜치는 실습실 Rocky Linux VM용([deploy.md](deploy.md), [lab-deploy-checklist.md](lab-deploy-checklist.md))이고, Vercel은 링크로 보여 주기 위한 공유용입니다.
+이 문서와 Vercel용 코드는 **`vercel` 브랜치**에만 있습니다. `main`은 실습실 Rocky Linux VM용이고, Vercel은 링크로 보여 주기 위한 공유용입니다.
 
 ## main(VM)과 다른 점
 
-| | main: Rocky VM / 로컬 | vercel 브랜치: Vercel |
+| | main: Rocky VM | vercel 브랜치: Vercel |
 |---|---|---|
-| 화면(public/) | Apache / Express | Vercel이 정적 파일로 서비스 |
-| API(/api)와 실시간(/socket.io) | Node 서버 하나 | Vercel 함수 `api/index.js`가 같은 Express + Socket.IO 서버를 실행 |
-| 실시간 전송 | WebSocket, 안 되면 폴링 | **WebSocket만** (Vercel 함수가 지원) |
-| 서버 여러 대일 때 | 해당 없음 | Redis(Upstash)로 서로 메시지 전달 |
-| DB | 같은 PC/VM의 MySQL | 클라우드 MySQL 호환 DB (TiDB Cloud 무료) |
+| 정적 파일 (`public/`, 게임 빌드 `public/play/`) | Node가 보냄 | Vercel이 바로 보냄 (빌드: `npm run build`) |
+| 회사 홈페이지(EJS), `/api/game`, `/game-socket.io`, 문의 폼 | Node 서버 하나 (3001) | Vercel 함수 `api/index.js`가 같은 Express + Socket.IO를 실행 (`vercel.json`의 rewrites) |
+| 실시간 | WebSocket, 안 되면 폴링 | **WebSocket만** (`public/community/js/realtime.js`) |
+| 서버 여러 대일 때 | 해당 없음 | `REDIS_URL`/`KV_URL`이 있으면 Redis로 서로 전달 (`server/game/socket.js`) |
+| DB | 같은 VM의 MySQL | TiDB Cloud (MySQL 호환, `DB_SSL=true`) |
+| 게임 DB 켜기 | `.env`의 `GAME_DATABASE_ENABLED=true` | `DB_HOST`가 있으면 자동으로 켜짐 |
+| 문의 저장, 사내 채팅 기록 | `data/` 폴더 | `/tmp` (Vercel이 다시 켜지면 지워짐) |
+| 사내 메일 (hMailServer) | 실습실 메일 서버 | 인터넷에서 실습실 메일 서버에 접속할 수 없어서 동작하지 않음 (문의는 "접수됨(메일 전달 실패)") |
 
 - 실시간 연결은 Vercel 함수 최대 실행 시간(300초)이 되면 끊기고, 화면이 자동으로 다시 연결해서 빠진 채팅을 채웁니다.
 - 처음 접속하거나 한동안 안 쓰다 접속하면 1~3초 느릴 수 있습니다.
-- 데이터는 로컬, VM과 공유되지 않는 별도 DB에 저장됩니다.
 
-준비물: GitHub 계정(저장소 `dongpal0825/aquabit`), 이 PC의 Node.js, 프로젝트 폴더.
+## 처음 설정 (한 번만)
 
----
+### 1. TiDB Cloud DB
 
-## 1. 클라우드 DB 만들기 (TiDB Cloud, 무료)
-
-1. https://tidbcloud.com 에 가입 (GitHub나 Google 계정)
-2. **Create Cluster** → **Starter**(무료), 지역 **Tokyo (ap-northeast-1)** → 만들기
-3. 클러스터의 **Connect** 버튼
-   - **Generate Password** → 비밀번호 바로 메모 (다시 안 보여 줌)
-   - `HOST`, `PORT`(4000), `USERNAME`(`xxxx.root` 모양) 메모
-4. 왼쪽 **SQL Editor**에서:
-
-```sql
-CREATE DATABASE aquabit;
-```
-
-## 2. 테이블과 테스트 데이터 넣기 (이 PC에서)
-
-새 PowerShell 창에서 (따옴표 안을 1번 값으로 바꿔서):
+1. https://tidbcloud.com → **Create Cluster** → **Starter**(무료), 지역 **Tokyo** → **Connect**에서 **Generate Password**, `HOST`/`PORT`(4000)/`USERNAME` 메모
+2. 이 PC에서 테이블과 테스트 데이터 (vercel 브랜치에서, 새 PowerShell 창):
 
 ```powershell
-cd C:\Users\<사용자>\Documents\202208053\aquabit\server
-$env:DB_HOST="gateway01.ap-northeast-1.prod.aws.tidbcloud.com"
-$env:DB_PORT="4000"
-$env:DB_USER="xxxx.root"
-$env:DB_PASSWORD="1번에서-만든-비밀번호"
-$env:DB_NAME="aquabit"
-$env:DB_SSL="true"
-$env:ADMIN_PASSWORD="Vercel용-관리자-비밀번호"
+cd C:\Users\<사용자>\Documents\202208053\aquabit
+git checkout vercel
+$env:DB_HOST="gateway01.ap-northeast-1.prod.aws.tidbcloud.com"; $env:DB_PORT="4000"; $env:DB_USER="xxxx.root"; $env:DB_NAME="aquabit"; $env:DB_SSL="true"; $env:GAME_DATABASE_ENABLED="true"
+$env:DB_PASSWORD="TiDB 비밀번호"
+$env:ADMIN_PASSWORD="Vercel 관리자 비밀번호"
 npm run db:init
 npm run seed
 ```
 
-- `스키마를 만들었어요: aquabit`과 seed 완료 메시지가 나오면 성공
-- `$env:` 값은 이 창에서만 유효하고 `server\.env`(로컬 DB 설정)는 바뀌지 않습니다. 끝나면 창을 닫으세요.
-- `ER_ACCESS_DENIED_ERROR`: 사용자 이름(`xxxx.root` 전체)이나 비밀번호 확인
-- `ER_BAD_DB_ERROR`: 1번 4단계의 `CREATE DATABASE aquabit;`를 안 함
-- `insecure transport are prohibited`: `$env:DB_SSL="true"` 빠짐
+`db:init`이 `aquabit` 데이터베이스까지 만듭니다. 끝나면 창을 닫으세요 (`$env:` 값은 그 창에서만 유효).
 
-## 3. 세션 키 만들기
+### 2. Vercel 프로젝트
 
-```powershell
-node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
-```
-
-나온 64자리를 메모합니다.
-
-## 4. Vercel 프로젝트 만들기
-
-1. https://vercel.com → **Sign Up** → **Continue with GitHub** (Hobby)
-2. **Add New...** → **Project** → `dongpal0825/aquabit` 옆 **Import**
-3. 설정 화면
-   - Framework Preset: **Other**
-   - Root Directory: `./` 그대로
-   - Build and Output Settings: 건드리지 않음 (`vercel.json`이 정함)
-4. **Environment Variables**:
+1. https://vercel.com → **Continue with GitHub** (Hobby) → **Add New... → Project** → `aquabit` **Import**
+2. Framework Preset **Other**, Root Directory `./`, 빌드 설정은 그대로 (`vercel.json`이 정함)
+3. **Environment Variables**:
 
 | Key | Value |
 |---|---|
 | `NODE_ENV` | `production` |
-| `SESSION_SECRET` | 3번의 64자리 |
-| `SERVE_STATIC` | `false` |
-| `DB_HOST` | 1번 HOST |
-| `DB_PORT` | `4000` |
-| `DB_USER` | 1번 USERNAME (`xxxx.root`) |
-| `DB_PASSWORD` | 1번 비밀번호 |
-| `DB_NAME` | `aquabit` |
+| `SESSION_SECRET` | 긴 무작위 문자열 (`node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"`) |
+| `DB_HOST` / `DB_PORT` / `DB_USER` / `DB_PASSWORD` / `DB_NAME` | TiDB 값 (`DB_PORT`=`4000`, `DB_NAME`=`aquabit`) |
 | `DB_SSL` | `true` |
 | `TIME_SCALE` | `1` |
 | `ADMIN_ENABLED` | `true` |
 
-5. **Deploy**. 이 첫 배포는 `main`(VM용 코드)으로 만들어지므로 실시간과 API가 제대로 안 될 수 있습니다. 바로 5번에서 브랜치를 바꿉니다.
+4. **Deploy** → 프로젝트 **Settings → Environments → Production → Branch Tracking**을 **`vercel`**로 바꾸고 저장 → `vercel` 브랜치에 push하면 그 버전이 Production으로 배포됩니다.
 
-## 5. vercel 브랜치로 배포하게 바꾸기
+### 3. (선택) Redis
 
-1. 프로젝트 → **Settings** → **Environments** → **Production** → **Branch Tracking**의 브랜치를 `main`에서 **`vercel`**로 바꾸고 저장
-   (메뉴 이름이 다르면 Settings의 **Git** 쪽에서 "Production Branch"를 찾으세요)
-2. **Deployments** 탭 → 오른쪽 위 **⋯** 또는 **Create Deployment** → 브랜치 `vercel` 선택 → 배포
-   (또는 이 PC에서 `vercel` 브랜치에 아무 커밋이나 push하면 자동 배포)
-3. 배포 목록에서 Branch가 `vercel`이고 **Production**으로 표시되면 완료
+접속자가 많아 함수 인스턴스가 여러 개 뜨면 일부 사람끼리 실시간 알림이 안 갈 수 있습니다. 프로젝트 **Storage → Upstash for Redis**(무료)를 연결하면 `KV_URL`/`REDIS_URL`이 자동으로 들어가고, **Redeploy** 후 자동으로 사용합니다.
 
-`main`에 push할 때 Vercel이 미리보기(Preview) 배포를 만들 수 있는데, 공유 주소(Production)에는 영향이 없습니다. 불필요하면 Settings → Git → **Ignored Build Step**에 아래를 넣으면 `vercel` 브랜치만 빌드합니다:
+## 확인
 
-```bash
-[ "$VERCEL_GIT_COMMIT_REF" != "vercel" ]
-```
+1. `https://<주소>/api/game/health` → `{"ok":true,"databaseEnabled":true}`
+2. `https://<주소>/` 회사 홈페이지 → **게임 시작** → `test1` / `aquabit123`
+3. 시크릿 창에서 `test2` / `aquabit123` → 같은 어항 채팅이 물고기 위 말풍선으로 바로 보이면 WebSocket 정상
+4. `admin` / 1번의 `ADMIN_PASSWORD` → 관리자 화면
 
-## 6. Redis 연결하기 (무료, 실시간 안정용)
-
-Vercel은 접속이 늘면 함수 인스턴스를 여러 개 띄웁니다. 철수가 1번, 영희가 2번 인스턴스에 붙으면 Redis 없이는 서로의 실시간 알림이 안 갈 수 있습니다.
-
-1. 프로젝트 → **Storage** 탭 (또는 **Marketplace**) → **Upstash** → **Upstash for Redis** → **Create** / **Install**
-2. 무료(Free) 요금제, 지역은 Tokyo처럼 가까운 곳 → 이 프로젝트에 연결(Connect)
-3. 환경 변수에 `KV_URL`, `REDIS_URL` 같은 값이 자동으로 추가됐는지 Settings → Environment Variables에서 확인
-4. **Deployments** → 최신 배포 **⋯** → **Redeploy** (환경 변수는 다시 배포해야 적용됨)
-
-앱은 `REDIS_URL`이나 `KV_URL`이 있으면 자동으로 Redis를 씁니다. 없으면 인스턴스 하나 안에서만 전달합니다 (접속자가 적으면 대부분 문제없음).
-
-## 7. 확인
-
-1. `https://<주소>/api/health` → `{"ok":true,"timeScale":1}`
-2. `https://<주소>/` → 홈 화면
-3. `test1` / `aquabit123` 로그인 → 출석 팝업
-4. 다른 브라우저(또는 시크릿 창)에서 `test2` / `aquabit123` → 같은 어항에서 채팅이 **바로** 보이면 WebSocket 정상
-5. `admin` / 2번의 `ADMIN_PASSWORD` → 관리자 화면
-6. 브라우저 개발자 도구(F12) → Network → `WS` 필터에 `socket.io` 연결이 101로 보이면 확실
-
-처음 보는 사람은 회원가입 후 초대 코드 `AQUA77`로 "클라우드 7팀"에 들어올 수 있습니다.
-
-## 8. 이후
-
-- Vercel용 수정은 `vercel` 브랜치에서 하고 push하면 자동 배포됩니다.
-- 서버 라이브러리(`server/package.json`의 dependencies)를 추가하거나 바꾸면 **루트 `package.json`에도 똑같이** 넣어야 합니다. Vercel은 루트에서 설치하기 때문입니다 (빠지면 Logs에 `Cannot find module`).
-- `main`의 기능 수정을 Vercel에도 반영하려면:
+## main의 수정을 Vercel에 반영
 
 ```powershell
 git checkout vercel
@@ -139,17 +74,15 @@ git push
 git checkout main
 ```
 
-- 데이터 초기화: 2번 PowerShell 명령 다시 실행 (모든 데이터와 로그인 삭제)
-- 공유 끝내기: Vercel 프로젝트 Settings 맨 아래 **Delete Project**, TiDB와 Upstash도 삭제
+충돌이 나면 대부분 `main` 쪽을 고르면 됩니다. 단, 아래 vercel 전용 부분은 유지합니다:
+`api/index.js`, `vercel.json`, `.vercelignore`, `docs/vercel.md`, `server/game/config.js`의 `DB_SSL`·자동 켜기, `config/index.js`의 `paths.writable`, `app.js`의 `trust proxy`, `realtime.js`의 `transports: ['websocket']`, `server/game/socket.js`의 Redis 부분, `package.json`의 `redis`·`@socket.io/redis-adapter`.
 
 ## 문제 해결
 
 | 증상 | 확인 |
 |---|---|
-| `/api/health`가 500 / `FUNCTION_INVOCATION_FAILED` | 프로젝트 → **Logs**. 대부분 DB 환경 변수 오타 |
-| Logs에 `Cannot find module ...` | 루트 `package.json`의 dependencies에 그 라이브러리가 있는지 |
-| `/api/...`가 404 | Production이 `vercel` 브랜치로 배포됐는지 (5번) |
-| 로그인 후 바로 로그인 화면으로 | `SESSION_SECRET`, 2번 db:init 여부 |
-| 채팅이 실시간으로 안 오고 2~5초 늦음 | WebSocket 연결 실패 후 폴링으로 동작 중. F12 → Console의 오류, Logs의 `[socket]`/`[redis]` 줄 확인 |
-| 어떤 사람끼리만 실시간이 안 감 | 인스턴스가 나뉨. 6번 Redis 연결 |
-| Logs에 `[redis] ... ECONNREFUSED` | Redis 주소 오류. 6번 환경 변수 확인 후 Redeploy |
+| 화면이 500 / `FUNCTION_INVOCATION_FAILED` | Vercel 프로젝트 → **Logs**. `Cannot find module`이면 `package.json` dependencies, DB 오류면 환경 변수 |
+| 로그인에서 "MySQL 설정 후 사용할 수 있어요" | `DB_HOST` 환경 변수가 비었는지 |
+| 로그인에서 "게임 저장소를 사용할 수 없어요" | TiDB 접속 실패: `DB_*`, `DB_SSL=true` |
+| 게임 화면이 비어 있음, `/play/...` 404 | 빌드 로그에서 `npm run build`가 성공했는지 |
+| 채팅이 2~5초 늦게 옴 | WebSocket 실패 후 폴링으로 동작 중. 브라우저 F12 → Console 오류, Logs의 `[redis]` 줄 |

@@ -1,0 +1,22 @@
+<%- include('partials/head') %>
+<%- include('partials/header') %>
+
+<main id="main">
+  <section class="section error-page">
+    <div class="container center">
+      <p class="error-code mono"><%= status %></p>
+      <% if (status === 400 || status === 413) { %>
+        <h1 class="page-title">요청을 처리할 수 없어요</h1>
+        <p class="page-lead">보낸 내용이 올바르지 않거나 너무 큽니다. 다시 시도해 주세요.</p>
+      <% } else { %>
+        <h1 class="page-title">물이 잠깐 흐려졌어요</h1>
+        <p class="page-lead">서버에 문제가 생겼습니다. 잠시 후 다시 시도해 주세요.</p>
+      <% } %>
+      <div class="hero-actions center-actions">
+        <a class="btn btn-play" href="/">홈으로</a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<%- include('partials/footer') %>

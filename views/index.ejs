@@ -1,0 +1,90 @@
+<%- include('partials/head') %>
+<%- include('partials/header') %>
+
+<main id="main">
+  <section class="hero" aria-labelledby="hero-title">
+    <canvas class="hero-canvas" id="aquarium-canvas" aria-hidden="true"></canvas>
+    <div class="container hero-content">
+      <p class="eyebrow">PIXEL AQUARIUM</p>
+      <h1 id="hero-title" class="hero-title">우리 팀 어항에<br>물고기를 띄워요</h1>
+      <p class="hero-text">
+        팀 어항을 만들고 초대 코드로 팀원을 부르세요.<br class="br-pc">
+        각자 꾸민 물고기가 함께 헤엄치며 이야기를 나눕니다.
+      </p>
+      <div class="hero-actions">
+        <a class="btn btn-play btn-lg" href="<%= gameUrl %>">
+          게임 시작
+          <svg class="icon" aria-hidden="true"><use href="/img/icons.svg#arrow"/></svg>
+        </a>
+        <a class="btn btn-ghost btn-lg" href="/game">게임 소개 보기</a>
+      </div>
+    </div>
+    <div class="hero-sand" aria-hidden="true"></div>
+  </section>
+
+  <section class="section" aria-labelledby="notice-title">
+    <div class="container">
+      <div class="section-head">
+        <h2 id="notice-title" class="section-title">최신 공지</h2>
+        <a class="more-link" href="/notices">전체 보기
+          <svg class="icon" aria-hidden="true"><use href="/img/icons.svg#arrow"/></svg>
+        </a>
+      </div>
+      <% if (latestNotices.length) { %>
+        <ul class="notice-cards">
+          <% latestNotices.forEach((n) => { %>
+            <li>
+              <a class="notice-card pixel-box" href="/notices/<%= n.id %>">
+                <span class="badge badge-<%= n.category %>"><%= n.categoryLabel %></span>
+                <strong class="notice-card-title"><%= n.title %></strong>
+                <time datetime="<%= n.date %>"><%= String(n.date).replace(/-/g, '.') %></time>
+              </a>
+            </li>
+          <% }) %>
+        </ul>
+      <% } else { %>
+        <p class="empty">등록된 공지가 없습니다.</p>
+      <% } %>
+    </div>
+  </section>
+
+  <section class="section section-tint" aria-labelledby="feature-title">
+    <div class="container">
+      <div class="section-head">
+        <h2 id="feature-title" class="section-title">Pixel Aquarium의 특징</h2>
+      </div>
+      <ul class="feature-grid">
+        <li class="feature-card pixel-box">
+          <span class="feature-icon tone-coral"><svg class="icon" aria-hidden="true"><use href="/img/icons.svg#users"/></svg></span>
+          <h3>팀 어항</h3>
+          <p>팀마다 하나의 어항을 만들고, 초대 코드를 나눠 팀원을 모읍니다. 우리 팀만의 작은 바다예요.</p>
+        </li>
+        <li class="feature-card pixel-box">
+          <span class="feature-icon tone-yellow"><svg class="icon" aria-hidden="true"><use href="/img/icons.svg#palette"/></svg></span>
+          <h3>꾸미고 키우기</h3>
+          <p>물고기 종류와 색, 장신구를 골라 꾸미고, 먹이를 주며 조금씩 키워 보세요.</p>
+        </li>
+        <li class="feature-card pixel-box">
+          <span class="feature-icon tone-mint"><svg class="icon" aria-hidden="true"><use href="/img/icons.svg#chat"/></svg></span>
+          <h3>어항 채팅</h3>
+          <p>어항마다 채팅방이 있고, 내가 쓴 말이 내 물고기 위에 말풍선으로 떠오릅니다.</p>
+        </li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="section cta" aria-labelledby="cta-title">
+    <div class="container cta-inner pixel-box">
+      <div>
+        <h2 id="cta-title" class="cta-title">팀 어항, 지금 만들어 볼까요?</h2>
+        <p>팀원 모두가 같은 어항에서 만나요.</p>
+      </div>
+      <a class="btn btn-play" href="<%= gameUrl %>">
+        게임 시작
+        <svg class="icon" aria-hidden="true"><use href="/img/icons.svg#arrow"/></svg>
+      </a>
+    </div>
+  </section>
+</main>
+
+<%- include('partials/footer', { scripts: ['/js/aquarium.js'] }) %>

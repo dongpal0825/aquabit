@@ -1,6 +1,10 @@
-server/node_modules
-server/.env
+node_modules
+.env
+key.txt
 sql/*.local.sql
+art_soo
+artwork
 shots
 .claude
 *.zip
+public/play

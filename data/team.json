@@ -1,0 +1,30 @@
+[
+  {
+    "role": "조장",
+    "title": "인프라 총괄 · PM",
+    "icon": "server",
+    "color": "coral",
+    "tasks": ["ESXi 호스트 구축", "vCenter 관리", "NFS 데이터스토어", "일정·문서 총괄"]
+  },
+  {
+    "role": "조원 1",
+    "title": "네트워크 · DNS",
+    "icon": "globe",
+    "color": "yellow",
+    "tasks": ["1차 네임서버(dns1)", "2차 네임서버(dns2)", "존 전송 설정"]
+  },
+  {
+    "role": "조원 2",
+    "title": "웹 · 게임 서비스",
+    "icon": "code",
+    "color": "mint",
+    "tasks": ["Apache 웹 서버", "Node.js 게임 서버", "MySQL 데이터베이스", "Pixel Aquarium 개발"]
+  },
+  {
+    "role": "조원 3",
+    "title": "사내 메일 · Windows",
+    "icon": "mail",
+    "color": "violet",
+    "tasks": ["hMailServer 사내 메일", "Windows Server 운영", "메일 계정 관리"]
+  }
+]

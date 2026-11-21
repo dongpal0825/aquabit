@@ -1,0 +1,61 @@
+<%- include('partials/head') %>
+<%- include('partials/header') %>
+
+<main id="main">
+  <section class="page-hero">
+    <div class="container">
+      <p class="eyebrow">CAREERS</p>
+      <h1 class="page-title">채용</h1>
+      <p class="page-lead">어항을 함께 돌볼 동료를 찾습니다.</p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <p class="notice-banner pixel-box">
+        아래 공고는 팀 프로젝트용 <strong>가상 채용 공고</strong>입니다. 실제 채용이 진행되지 않습니다.
+      </p>
+
+      <ul class="career-list">
+        <% careers.forEach((job) => { %>
+          <li class="career-card pixel-box" id="<%= job.id %>">
+            <div class="career-head">
+              <p class="career-team"><%= job.team %></p>
+              <h2 class="career-title"><%= job.title %></h2>
+              <ul class="tag-list">
+                <li><%= job.type %></li>
+                <li><%= job.location %></li>
+              </ul>
+            </div>
+            <div class="career-body">
+              <div>
+                <h3>하는 일</h3>
+                <ul class="check-list"><% (job.duties || []).forEach((d) => { %><li><%= d %></li><% }) %></ul>
+              </div>
+              <div>
+                <h3>자격 요건</h3>
+                <ul class="check-list"><% (job.requirements || []).forEach((d) => { %><li><%= d %></li><% }) %></ul>
+              </div>
+              <% if ((job.preferred || []).length) { %>
+                <div>
+                  <h3>우대 사항</h3>
+                  <ul class="check-list"><% job.preferred.forEach((d) => { %><li><%= d %></li><% }) %></ul>
+                </div>
+              <% } %>
+            </div>
+          </li>
+        <% }) %>
+      </ul>
+
+      <div class="cta-inner pixel-box">
+        <div>
+          <h2 class="cta-title">궁금한 점이 있나요?</h2>
+          <p>채용 관련 문의는 고객센터 문의 폼에서 ‘제휴·기타’ 분류로 남겨 주세요.</p>
+        </div>
+        <a class="btn btn-play" href="/support#inquiry">문의하기</a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<%- include('partials/footer') %>

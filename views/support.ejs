@@ -1,0 +1,129 @@
+<%- include('partials/head') %>
+<%- include('partials/header') %>
+<%
+  const field = (name) => ({
+    invalid: Boolean(errors[name]),
+    attrs: errors[name] ? `aria-invalid="true" aria-describedby="err-${name}"` : '',
+  });
+%>
+
+<main id="main">
+  <section class="page-hero">
+    <div class="container">
+      <p class="eyebrow">SUPPORT</p>
+      <h1 class="page-title">고객센터</h1>
+      <p class="page-lead">자주 묻는 질문을 먼저 확인하고, 해결되지 않으면 문의를 남겨 주세요.</p>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="faq-title">
+    <div class="container container-narrow">
+      <h2 id="faq-title" class="section-title">자주 묻는 질문</h2>
+      <div class="faq">
+        <% faq.forEach((item, i) => { %>
+          <details class="faq-item" name="faq">
+            <summary>
+              <span class="faq-q" aria-hidden="true">Q</span>
+              <span class="faq-question"><%= item.question %></span>
+              <svg class="icon faq-icon" aria-hidden="true"><use href="/img/icons.svg#plus"/></svg>
+            </summary>
+            <div class="faq-answer"><p><%= item.answer %></p></div>
+          </details>
+        <% }) %>
+      </div>
+    </div>
+  </section>
+
+  <section class="section section-tint" id="inquiry" aria-labelledby="inquiry-title">
+    <div class="container container-narrow">
+      <h2 id="inquiry-title" class="section-title">1:1 문의하기</h2>
+
+      <% if (result === 'sent') { %>
+        <div class="alert alert-success pixel-box" role="status">
+          <strong>문의가 접수되었습니다.</strong>
+          <p>담당자에게 전달했습니다. 적어 주신 이메일로 답변을 보내 드릴게요.
+            <% if (receiptId) { %><br>접수 번호: <span class="mono"><%= receiptId %></span><% } %></p>
+        </div>
+      <% } else if (result === 'mail_failed') { %>
+        <div class="alert alert-warning pixel-box" role="status">
+          <strong>접수됨 (메일 전달 실패)</strong>
+          <p>문의 내용은 안전하게 저장되었지만, 메일 서버 문제로 담당자에게 바로 전달하지 못했습니다. 저장된 문의는 담당자가 직접 확인합니다.
+            <% if (receiptId) { %><br>접수 번호: <span class="mono"><%= receiptId %></span><% } %></p>
+        </div>
+      <% } %>
+
+      <% if (formError) { %>
+        <div class="alert alert-error pixel-box" role="alert">
+          <strong><%= formError %></strong>
+        </div>
+      <% } %>
+
+      <form class="form pixel-box" method="post" action="/support/inquiry" novalidate>
+        <input type="hidden" name="token" value="<%= token %>">
+
+        <!-- 스팸 방지용 칸: 사람에게는 보이지 않음. 비워 두어야 접수됨 -->
+        <div class="hp" aria-hidden="true">
+          <label for="website">웹사이트</label>
+          <input type="text" id="website" name="website" tabindex="-1" autocomplete="off">
+        </div>
+
+        <div class="form-row form-row-2">
+          <div class="form-field<%= field('name').invalid ? ' has-error' : '' %>">
+            <label for="name">이름 <span class="req">*</span></label>
+            <input type="text" id="name" name="name" maxlength="30" required autocomplete="name"
+              value="<%= values.name %>" <%- field('name').attrs %>>
+            <% if (errors.name) { %><p class="field-error" id="err-name"><%= errors.name %></p><% } %>
+          </div>
+          <div class="form-field<%= field('email').invalid ? ' has-error' : '' %>">
+            <label for="email">이메일 <span class="req">*</span></label>
+            <input type="email" id="email" name="email" maxlength="100" required autocomplete="email"
+              placeholder="user@aquabit.lab" value="<%= values.email %>" <%- field('email').attrs %>>
+            <% if (errors.email) { %><p class="field-error" id="err-email"><%= errors.email %></p><% } %>
+          </div>
+        </div>
+
+        <div class="form-field<%= field('category').invalid ? ' has-error' : '' %>">
+          <label for="category">문의 분류 <span class="req">*</span></label>
+          <select id="category" name="category" required <%- field('category').attrs %>>
+            <option value="">분류를 선택해 주세요</option>
+            <% Object.entries(categories).forEach(([key, label]) => { %>
+              <option value="<%= key %>"<% if (values.category === key) { %> selected<% } %>><%= label %></option>
+            <% }) %>
+          </select>
+          <% if (errors.category) { %><p class="field-error" id="err-category"><%= errors.category %></p><% } %>
+        </div>
+
+        <div class="form-field<%= field('subject').invalid ? ' has-error' : '' %>">
+          <label for="subject">제목 <span class="req">*</span></label>
+          <input type="text" id="subject" name="subject" maxlength="100" required
+            value="<%= values.subject %>" <%- field('subject').attrs %>>
+          <% if (errors.subject) { %><p class="field-error" id="err-subject"><%= errors.subject %></p><% } %>
+        </div>
+
+        <div class="form-field<%= field('message').invalid ? ' has-error' : '' %>">
+          <label for="message">내용 <span class="req">*</span> <span class="hint">(10자 이상)</span></label>
+          <textarea id="message" name="message" rows="7" minlength="10" maxlength="3000" required <%- field('message').attrs %>><%= values.message %></textarea>
+          <% if (errors.message) { %><p class="field-error" id="err-message"><%= errors.message %></p><% } %>
+        </div>
+
+        <div class="form-field<%= field('agree').invalid ? ' has-error' : '' %>">
+          <div class="privacy-box">
+            <p><strong>개인정보 수집·이용 안내</strong></p>
+            <p>수집 항목: 이름, 이메일, 접속 IP · 목적: 문의 답변 · 보관: 답변 완료 후 30일</p>
+          </div>
+          <label class="checkbox">
+            <input type="checkbox" name="agree" <% if (values.agree) { %>checked<% } %> <%- field('agree').attrs %>>
+            <span>개인정보 수집·이용에 동의합니다. <span class="req">*</span></span>
+          </label>
+          <% if (errors.agree) { %><p class="field-error" id="err-agree"><%= errors.agree %></p><% } %>
+        </div>
+
+        <div class="form-actions">
+          <button class="btn btn-play" type="submit">문의 보내기</button>
+        </div>
+      </form>
+    </div>
+  </section>
+</main>
+
+<%- include('partials/footer', { scripts: ['/js/faq.js'] }) %>
