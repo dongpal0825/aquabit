@@ -35,7 +35,7 @@ function appearance(f) {
   const key = kind(f);
   return { id: String(f.id), name: f.ownerNickname === '나' ? '내 물고기' : f.ownerNickname || f.name || '', species: key,
     hue: f.hue ?? (f.color === 'original' ? originalHue[key] : hues[f.color] ?? originalHue[key]),
-    xp: (f.foodTotal || 0) * 5, displayLevel: f.stage || 1, accessory: accessories[f.accessory] || 'none', effect: 'none' };
+    xp: (f.foodTotal || 0) * 5, displayLevel: f.stage || 1, accessory: accessories[f.accessory] || 'none', effect: (f.stage || 1) >= 4 ? 'sparkle' : 'none' }; // 최고 레벨(Lv.4)은 반짝이가 계속 맴돔
 }
 const spriteCache = new Map();
 PA.SPECIES = Object.fromEntries(Object.entries(species).map(([key, label]) => [key, { label }]));
@@ -159,8 +159,10 @@ class IntegratedTankScene {
   start() {}
   fishScreenPos(id) { return this.engine?.fishScreenPos(String(id)) || { x: innerWidth / 2, y: innerHeight / 2 }; }
   dropFood(x, y, id, callback) { this.ready.then(() => this.engine?.dropFood(x, y, callback, id)); }
-  say(id, text) { window.AquaTank?.toast(window.Aqua.escapeHtml(this.list.find(f => f.id === id)?.ownerNickname || '') + ': ' + window.Aqua.escapeHtml(text)); }
-  sparkleBurst() {}
+  // 채팅은 위쪽 알림 대신 보낸 사람 물고기 위 말풍선으로 (Pixi Text라 HTML로 해석되지 않음)
+  say(id, text) { this.ready.then(() => this.engine?.say(String(id), text)); }
+  // 레벨 업: 반짝이가 퍼지고 물고기가 깜빡임. tank.js·realtime.js가 sparkleBurst와 flash를 연달아 부르므로 한쪽만 실행
+  sparkleBurst(id) { this.ready.then(() => this.engine?.celebrate(String(id))); }
   flash() {}
   destroy() { this.disposed = true; clearTimeout(this.selectionTimer); this.engine?.destroy(); this.vue.unmount(); this.host.removeEventListener('pointerdown', this.pointerDown); this.host.removeEventListener('pointerup', this.pointerUp); }
 }

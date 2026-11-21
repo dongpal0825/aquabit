@@ -1,5 +1,5 @@
 import 'pixi.js/unsafe-eval'; // CSP를 완화하지 않고 정적 셰이더 동기화 코드를 사용합니다.
-import { Application, Assets, BlurFilter, ColorMatrixFilter, Container, Rectangle, Sprite, Text } from 'pixi.js';
+import { Application, Assets, BlurFilter, ColorMatrixFilter, Container, Graphics, Rectangle, Sprite, Text } from 'pixi.js';
 import { GlowFilter } from 'pixi-filters/glow';
 import { AquariumSimulation, shrimpGroundY, isBottomSpecies, fishDisplayWidth } from './simulation.mjs';
 import { SpriteAnimation } from './sprite-animation.mjs';
@@ -69,7 +69,12 @@ export async function createAquarium(host, { onSelect, onDoubleSelect, onEat, on
   const can = new Sprite(textures['food-can']);
   can.anchor.set(.5);
   can.eventMode = 'static'; can.cursor = 'grab';
-  inhabitants.addChild(ambient, fishHalos, fishes, foods, bubbles);
+  // 레벨 업 반짝이 조각과 채팅 말풍선 (물고기 위에 그림)
+  const sparks = new Container({ label: 'level-up sparks', eventMode: 'none' });
+  const speech = new Container({ label: 'speech bubbles', eventMode: 'none' });
+  inhabitants.addChild(ambient, fishHalos, fishes, foods, bubbles, sparks, speech);
+  const speechNodes = new Map(), sparkList = [];
+  const flashFilter = new ColorMatrixFilter(); flashFilter.brightness(2.6, false);
   controls.addChild(can, feedback);
   app.stage.addChild(inhabitants, controls);
   const model = new AquariumSimulation({ onDispense, canDispense, onFeedBlocked, onEat(id, position, pelletId) {
@@ -213,6 +218,75 @@ export async function createAquarium(host, { onSelect, onDoubleSelect, onEat, on
     }
   }
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // ── 채팅 말풍선: 보낸 사람 물고기 머리 위, 최대 3줄, 5초 ──
+  const INK = 0x0b1d3a, PAPER = 0xffffff;
+  const SPEECH_MS = 5000, SPEECH_FADE_MS = 500, SPEECH_MAX_CHARS = 36;
+  function say(id, message) {
+    const key = String(id);
+    if (!fishNodes.has(key)) return;
+    speechNodes.get(key)?.root.destroy({ children: true });
+    const text = [...String(message).replace(/\s+/g, ' ').trim()];
+    const body = text.length > SPEECH_MAX_CHARS ? text.slice(0, SPEECH_MAX_CHARS - 1).join('') + '…' : text.join('');
+    const root = new Container();
+    const label = new Text({ text: body, style: { fontFamily: 'Malgun Gothic, system-ui, sans-serif', fontSize: 12, fontWeight: '600',
+      fill: '#0b1d3a', lineHeight: 16, wordWrap: true, breakWords: true, wordWrapWidth: 150 } });
+    const padX = 8, padY = 5, w = Math.ceil(label.width) + padX * 2, h = Math.ceil(label.height) + padY * 2;
+    const tail = Math.round(w / 2) - 5;
+    const g = new Graphics();
+    g.rect(3, 3, w, h).fill(INK);                                                      // 픽셀 그림자
+    g.rect(0, 0, w, h).fill(PAPER).stroke({ width: 2, color: INK, alignment: 1 });    // 상자
+    g.poly([tail, h - 2, tail + 10, h - 2, tail + 2, h + 7]).fill(PAPER).stroke({ width: 2, color: INK });
+    g.rect(tail + 2, h - 2, 7, 2).fill(PAPER);                                        // 꼬리와 상자 사이 선 지우기
+    label.position.set(padX, padY);
+    root.addChild(g, label);
+    root.pivot.set(w / 2, h + 8);
+    speech.addChild(root);
+    speechNodes.set(key, { root, w, h, born: performance.now() });
+  }
+
+  // ── 레벨 업 연출: 픽셀 반짝이가 터지듯 퍼지고 물고기가 하얗게 깜빡임 ──
+  const SPARK_COLORS = [0xffd34e, 0xffffff, 0x4fd1e8, 0xffe6a3];
+  function celebrate(id) {
+    const key = String(id), node = fishNodes.get(key);
+    if (!node) return;
+    node.flashUntil = performance.now() + 540;
+    if (reducedMotion) return;
+    const px = app.screen.width < 600 ? 4 : 5, count = 26;
+    for (let i = 0; i < count && sparkList.length < 80; i++) {
+      const g = new Graphics().rect(-px / 2, -px / 2, px, px).fill(SPARK_COLORS[i % SPARK_COLORS.length]);
+      const angle = Math.PI * 2 * i / count + Math.random() * .25, speed = 80 + Math.random() * 110;
+      sparks.addChild(g);
+      sparkList.push({ g, x: node.root.x, y: node.root.y, vx: Math.cos(angle) * speed, vy: Math.sin(angle) * speed - 30,
+        born: performance.now(), life: 750 + Math.random() * 450, px });
+    }
+  }
+  function stepEffects(deltaMS) {
+    const now = performance.now(), dt = Math.min(deltaMS, 50) / 1000;
+    for (let i = sparkList.length - 1; i >= 0; i--) {
+      const s = sparkList[i], age = (now - s.born) / s.life;
+      if (age >= 1) { s.g.destroy(); sparkList.splice(i, 1); continue; }
+      s.vy += 120 * dt; s.vx *= .985;
+      s.x += s.vx * dt; s.y += s.vy * dt;
+      s.g.position.set(Math.round(s.x / s.px) * s.px, Math.round(s.y / s.px) * s.px);
+      s.g.alpha = age < .6 ? 1 : 1 - (age - .6) / .4;
+    }
+    for (const [key, node] of fishNodes) {
+      const left = (node.flashUntil || 0) - now;
+      const on = left > 0 && Math.floor(left / 90) % 2 === 0;
+      if (on !== !!node.flashing) { node.body.filters = on ? [flashFilter] : null; node.flashing = on; }
+      const bubble = speechNodes.get(key);
+      if (!bubble) continue;
+      const age = now - bubble.born;
+      if (age >= SPEECH_MS) { bubble.root.destroy({ children: true }); speechNodes.delete(key); continue; }
+      const top = node.root.y - fishDisplayWidth(model.view, node.species) / 3 - 4;
+      const maxX = app.screen.width - canInsetRight() - bubble.w / 2 - 6;
+      bubble.root.position.set(Math.round(Math.max(bubble.w / 2 + 6, Math.min(maxX, node.root.x))), Math.round(Math.max(bubble.h + 12, top)));
+      bubble.root.alpha = age > SPEECH_MS - SPEECH_FADE_MS ? (SPEECH_MS - age) / SPEECH_FADE_MS : 1;
+    }
+    for (const [key, bubble] of speechNodes) if (!fishNodes.has(key)) { bubble.root.destroy({ children: true }); speechNodes.delete(key); }
+  }
+
   function tick(ticker) {
     model.step(ticker.deltaMS);
     if (!model.paused) sceneryTime += Math.min(ticker.deltaMS, 50) / 1000;
@@ -263,6 +337,7 @@ export async function createAquarium(host, { onSelect, onDoubleSelect, onEat, on
         if (node.effect.aurora) node.effect.color.matrix = hueMatrix(reducedMotion ? 130 : (model.time / 35) % 360);
       }
     }
+    stepEffects(ticker.deltaMS);
     const active = new Set();
     for (const pellet of model.pellets) {
       active.add(pellet.id);
@@ -301,6 +376,10 @@ export async function createAquarium(host, { onSelect, onDoubleSelect, onEat, on
       if (callback) foodCallbacks.set(id, callback);
       model.pellets.push({ id, x: Math.max(.03, Math.min(.97, x / app.screen.width)), y: start, start, born: model.time, ...(forId != null && { forId: String(forId) }) });
     },
+    /** 채팅 말풍선을 이 물고기 위에 띄운다 */
+    say,
+    /** 레벨 업 연출 (반짝이 + 깜빡임) */
+    celebrate,
     setFoodCount(value) { model.setFoodCount(value); },
     setPaused(value) { model.paused = value; },
     setEnvironment(value) {
