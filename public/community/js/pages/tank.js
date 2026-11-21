@@ -209,9 +209,21 @@
 
   // ── 먹이 주기 ──
   function setFeedMode(on, targetId) {
+    // 팀원 물고기에게도 줄 수 있으므로, 내 물고기가 배불러도 아직 덜 먹은 물고기가 있으면 연다
+    let pick = null;
     if (on) {
-      const reason = feedReason();
-      if (reason) { showFeedNotice(reason); return; }
+      if (state.wallet.inventory.food <= 0) { showFeedNotice('먹이가 부족해요'); return; }
+      const asked = targetId && fishById(targetId);
+      if (asked) {
+        const reason = feedReason(asked);
+        if (reason) { showFeedNotice(reason); return; }
+        pick = asked;
+      } else {
+        const hungry = (f) => f && !feedReason(f);
+        const mf = myFish(), prev = fishById(state.feedTargetId);
+        pick = [mf, prev, ...state.fish].find(hungry);
+        if (!pick) { showFeedNotice('오늘은 모두 배불러요'); return; }
+      }
     }
     state.feedMode = on;
     $('actFeed').setAttribute('aria-pressed', String(on));
@@ -219,9 +231,7 @@
     scene.opts.waterCursor = on ? 'crosshair' : 'default';
     if (on) {
       closeCard();
-      const mf = myFish();
-      state.feedTargetId = targetId || state.feedTargetId || (mf && mf.id);
-      if (!fishById(state.feedTargetId)) state.feedTargetId = mf && mf.id;
+      state.feedTargetId = pick.id;
       scene.selectedId = state.feedTargetId;
       renderFeedTargets();
     } else {
