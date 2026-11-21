@@ -138,6 +138,19 @@
     </form>
   </dialog>
 
+  <dialog class="admin-dialog panel" id="userDelDialog" aria-labelledby="userDelTitle">
+    <form method="dialog" id="userDelForm">
+      <h2 class="dlg-title pixel" id="userDelTitle">사용자 강제 탈퇴</h2>
+      <p class="admin-help" id="userDelText"></p>
+      <label class="check"><input type="checkbox" id="userDelAgree"> 되돌릴 수 없다는 것을 확인했어요</label>
+      <p class="form-error" role="alert" id="userDelError"></p>
+      <div class="dlg-actions">
+        <button class="btn btn--foam" value="cancel">취소</button>
+        <button class="btn btn--coral" value="ok">탈퇴시키기</button>
+      </div>
+    </form>
+  </dialog>
+
   <script src="/community/js/api.js"></script>
   <script src="/community/js/pages/admin.js"></script>
 </body>

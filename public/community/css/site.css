@@ -105,6 +105,9 @@
 }
 .site-skin .input:focus { outline: 3px solid var(--yellow); outline-offset: 0; box-shadow: 0 0 0 6px var(--ink); }
 .site-skin .form-error { color: #d23c3c; font-weight: 700; }
+.site-skin .check { display: flex; align-items: center; gap: 8px; margin: 0 0 10px; font-size: 14px; font-weight: 600; cursor: pointer; }
+.site-skin .check input { width: 18px; height: 18px; accent-color: var(--ink); }
+.site-skin .account-box { border-style: dashed; box-shadow: var(--shadow-sm); }
 .site-skin .tag { font-family: var(--font-body); font-weight: 800; border: 2px solid var(--ink); box-shadow: none; }
 
 /* ---------- 바다 배너 (랜딩 .page-hero, 모래 경계 포함) ---------- */

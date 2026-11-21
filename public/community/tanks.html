@@ -54,6 +54,12 @@
         <p class="form-error" role="alert" data-error></p>
         <button class="btn" type="submit">참여하기</button>
       </form>
+
+      <section class="panel action-box account-box" id="accountBox" aria-labelledby="accountTitle" hidden>
+        <h2 class="box-title" id="accountTitle">내 계정</h2>
+        <p class="box-help">탈퇴하면 물고기, 채팅, 진주와 아이템이 모두 지워지고 되돌릴 수 없어요.</p>
+        <button class="btn btn--coral btn--small" type="button" id="byeBtn">회원 탈퇴</button>
+      </section>
     </section>
 
     <section class="tanks-list-wrap" aria-labelledby="listTitle">
@@ -62,6 +68,23 @@
       <ul class="tank-grid" id="tankGrid"></ul>
     </section>
   </main>
+
+  <dialog class="panel created-dialog" id="byeDialog" aria-labelledby="byeTitle">
+    <form method="dialog" id="byeForm" novalidate>
+      <h2 class="box-title" id="byeTitle">회원 탈퇴</h2>
+      <p class="box-help" id="byeText"></p>
+      <div class="field">
+        <label for="byePw">비밀번호 확인</label>
+        <input class="input" id="byePw" type="password" autocomplete="current-password" required>
+      </div>
+      <label class="check"><input type="checkbox" id="byeAgree"> 되돌릴 수 없다는 것을 확인했어요</label>
+      <p class="form-error" role="alert" id="byeError"></p>
+      <div class="dialog-actions">
+        <button class="btn btn--foam" value="cancel">취소</button>
+        <button class="btn btn--coral" value="ok">탈퇴하기</button>
+      </div>
+    </form>
+  </dialog>
 
   <dialog class="panel created-dialog" id="createdDialog" aria-labelledby="createdTitle">
     <h2 class="box-title" id="createdTitle">어항을 만들었어요</h2>

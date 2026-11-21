@@ -8,6 +8,7 @@ const { requireAuth, requireAdmin } = require('../lib/auth');
 const { changePearls, getInventory, addItem } = require('../lib/pearls');
 const { MAX_MEMBERS, STAGES, kstDate } = require('../lib/game');
 const realtime = require('../lib/realtime');
+const { deleteAccount } = require('../lib/accounts');
 
 const router = express.Router();
 router.use(requireAuth, requireAdmin);
@@ -187,6 +188,15 @@ router.post('/users/:id/grant', wrap(async (req, res) => {
 }));
 
 // 공지: 특정 어항 또는 모든 어항의 채팅에 공지로 남기고 실시간 알림
+// 사용자 강제 탈퇴 (관리자 계정은 막음). 대표인 어항은 다른 팀원에게 넘기고, 혼자인 어항은 삭제
+router.delete('/users/:id', wrap(async (req, res) => {
+  const id = Number(req.params.id);
+  const [[u]] = await pool.query('SELECT id, is_admin FROM users WHERE id = ?', [id]);
+  if (!u) throw notFound('없는 사용자예요.');
+  if (u.is_admin) throw bad('관리자 계정은 탈퇴시킬 수 없어요.', 'ADMIN_CANNOT_DELETE');
+  res.json({ ok: true, ...(await deleteAccount(id, { by: 'admin' })) });
+}));
+
 router.post('/notices', wrap(async (req, res) => {
   const body = String(req.body.body || '').trim();
   const tankId = req.body.tankId ? Number(req.body.tankId) : null;
