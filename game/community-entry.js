@@ -124,13 +124,17 @@ class IntegratedTankScene {
         }
       },
       onFeeding() {}, onEat() {},
+      pourCount: 1, // 먹이통은 한 번에 한 알씩
+      // 먹이통 먹이는 먹이 주기에서 고른 물고기에게 (팀원 물고기 가능). 고르지 않았으면 내 물고기, 배부르면 덜 먹은 팀원 물고기
       canDispense: () => {
-        const T = window.AquaTank, fish = T?.state.fish.find(f => f.userId === T.user.id);
-        return T && fish ? feedingBlockReason({ foodCount: T.state.wallet.inventory.food, fedToday: fish.fedToday, dailyFeedLimit: fish.dailyFeedLimit }) : '';
+        const T = window.AquaTank, fish = this.canTarget();
+        if (!T || !fish) return '';
+        this.engine?.setFeedTarget(String(fish.id));
+        return feedingBlockReason({ foodCount: T.state.wallet.inventory.food, fedToday: fish.fedToday, dailyFeedLimit: fish.dailyFeedLimit });
       },
       onFeedBlocked: reason => window.AquaTank?.showFeedNotice(reason),
       onDispense: async count => {
-        const T = window.AquaTank, fish = this.list.find(f => f.userId === T?.user.id);
+        const T = window.AquaTank, fish = this.canTarget();
         if (!fish) return { dispensed: 0, foodCount: 0 };
         return dispenseFeedBatch({ count,
           getState: () => ({ foodCount: T.state.wallet.inventory.food, ...T.state.fish.find(f => f.id === fish.id) }),
@@ -158,7 +162,16 @@ class IntegratedTankScene {
   setFish(fish) { this.list = fish; this.sync(); }
   start() {}
   fishScreenPos(id) { return this.engine?.fishScreenPos(String(id)) || { x: innerWidth / 2, y: innerHeight / 2 }; }
-  dropFood(x, y, id, callback) { this.ready.then(() => this.engine?.dropFood(x, y, callback, id)); }
+  // 먹이 주기 클릭: 먹이통이 그 자리 위로 가서 한 알을 붓고, 고른 물고기(id)가 먹으러 간다
+  dropFood(x, y, id, callback) { this.ready.then(() => this.engine?.pourAt(x, y, callback, id)); }
+  canTarget() {
+    const T = window.AquaTank;
+    if (!T) return null;
+    const hungry = f => f && (f.fedToday ?? 0) < (f.dailyFeedLimit || 5);
+    const mine = T.state.fish.find(f => f.userId === T.user.id);
+    const chosen = T.state.feedMode ? T.state.fish.find(f => f.id === T.state.feedTargetId) : null;
+    return chosen || (hungry(mine) ? mine : T.state.fish.find(hungry)) || mine;
+  }
   // 채팅은 위쪽 알림 대신 보낸 사람 물고기 위 말풍선으로 (Pixi Text라 HTML로 해석되지 않음)
   say(id, text) { this.ready.then(() => this.engine?.say(String(id), text)); }
   // 레벨 업: 반짝이가 퍼지고 물고기가 깜빡임. tank.js·realtime.js가 sparkleBurst와 flash를 연달아 부르므로 한쪽만 실행

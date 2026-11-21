@@ -16,7 +16,7 @@ const textStyle = { fontFamily: 'Malgun Gothic, sans-serif', fontSize: 10, fill:
 
 // 입력: 직렬화 가능한 물고기 목록 / 출력: 선택·먹이 이벤트만 전달합니다.
 // API 호출, 로그인, localStorage, 경험치 계산은 이 렌더러의 책임이 아닙니다.
-export async function createAquarium(host, { onSelect, onDoubleSelect, onEat, onDispense, onFeeding, canDispense, onFeedBlocked, canInsetRight = () => 0, showcase = false }) {
+export async function createAquarium(host, { onSelect, onDoubleSelect, onEat, onDispense, onFeeding, canDispense, onFeedBlocked, canInsetRight = () => 0, showcase = false, pourCount = 3 }) {
   const app = new Application();
   await app.init({ width: host.clientWidth, height: host.clientHeight, backgroundAlpha: 0,
     antialias: false, autoDensity: true, resolution: Math.min(window.devicePixelRatio || 1, 2),
@@ -77,7 +77,7 @@ export async function createAquarium(host, { onSelect, onDoubleSelect, onEat, on
   const flashFilter = new ColorMatrixFilter(); flashFilter.brightness(2.6, false);
   controls.addChild(can, feedback);
   app.stage.addChild(inhabitants, controls);
-  const model = new AquariumSimulation({ onDispense, canDispense, onFeedBlocked, onEat(id, position, pelletId) {
+  const model = new AquariumSimulation({ onDispense, canDispense, onFeedBlocked, pourCount, onEat(id, position, pelletId) {
     const callback = foodCallbacks.get(pelletId);
     foodCallbacks.delete(pelletId);
     callback?.();
@@ -350,7 +350,7 @@ export async function createAquarium(host, { onSelect, onDoubleSelect, onEat, on
     }
     for (const [id, image] of pelletNodes) if (!active.has(id)) { image.destroy(); pelletNodes.delete(id); }
     can.position.set(model.can.x, model.can.y);
-    can.rotation = model.can.ready ? -115 * Math.PI / 180 : (model.drag?.kind === 'food' ? 0 : 12 * Math.PI / 180);
+    can.rotation = model.can.ready ? -115 * Math.PI / 180 : (model.drag?.kind === 'food' || model.can.moving ? 0 : 12 * Math.PI / 180);
     const feeding = model.drag?.kind === 'food', key = `${feeding}:${model.can.ready}`;
     if (key !== feedingState) { feedingState = key; onFeeding({ active: feeding, ready: model.can.ready }); }
     for (let i = popups.length - 1; i >= 0; i--) {
@@ -376,6 +376,12 @@ export async function createAquarium(host, { onSelect, onDoubleSelect, onEat, on
       if (callback) foodCallbacks.set(id, callback);
       model.pellets.push({ id, x: Math.max(.03, Math.min(.97, x / app.screen.width)), y: start, start, born: model.time, ...(forId != null && { forId: String(forId) }) });
     },
+    /** 먹이 주기 클릭: 먹이통이 x 위로 가서 한 알을 붓는다. 그 알은 forId 물고기만 먹고, 먹으면 callback */
+    pourAt(x, y, callback, forId) {
+      model.pourAt(x / app.screen.width, forId, id => { if (callback) foodCallbacks.set(id, callback); });
+    },
+    /** 먹이통을 끌어 붓는 먹이를 먹을 물고기 (null이면 내 물고기) */
+    setFeedTarget(id) { model.setFeedTarget(id); },
     /** 채팅 말풍선을 이 물고기 위에 띄운다 */
     say,
     /** 레벨 업 연출 (반짝이 + 깜빡임) */

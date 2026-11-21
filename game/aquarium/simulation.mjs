@@ -40,8 +40,11 @@ export function constrainFish(point, view, species = point.species) {
 }
 
 export class AquariumSimulation {
-  constructor({ onEat = () => {}, onDispense = null, canDispense = () => '', onFeedBlocked = () => {}, random = Math.random, viewerId = null } = {}) {
+  constructor({ onEat = () => {}, onDispense = null, canDispense = () => '', onFeedBlocked = () => {}, random = Math.random, viewerId = null, pourCount = 3 } = {}) {
     this.onEat = onEat;
+    this.pourCount = pourCount;     // 먹이통을 한 번 기울일 때 나오는 알 수 (팀 어항은 1)
+    this.feedTargetId = null;       // 먹이통 먹이를 먹을 물고기 (없으면 내 물고기)
+    this.pours = [];                // 먹이 주기 클릭: 먹이통이 그 자리로 가서 한 알 붓는 동작 대기열
     this.random = random;
     this.viewerId = viewerId;
     this.onDispense = onDispense;
@@ -60,6 +63,41 @@ export class AquariumSimulation {
   }
 
   setFoodCount(value) { this.foodCount = normalizeFoodCount(value); }
+
+  setFeedTarget(id) { this.feedTargetId = id == null ? null : String(id); }
+
+  /** 먹이통이 x(0~1) 위로 날아가 한 알을 붓고 제자리로 돌아온다. 서버 처리는 끝난 뒤 부른다 (재고를 줄이지 않음). */
+  pourAt(x, forId, onSpawn) {
+    this.pours.push({ x: clamp(x, 0, 1), forId: forId == null ? null : String(forId), onSpawn, t: null });
+  }
+
+  stepPour(dt) {
+    const pour = this.pours[0], margin = this.view.canRadius + 4;
+    const MOVE = 280, TILT = 420, BACK = 300;
+    if (pour.t === null) { pour.t = 0; pour.from = { x: this.can.x, y: this.can.y }; }
+    pour.t += dt;
+    const mouthDx = foodMouth(this.view, { x: 0, y: 0 }).x;
+    const at = { x: clamp(pour.x * this.view.width - mouthDx, margin, this.view.width - margin), y: margin + 12 };
+    const home = { x: this.view.canX, y: this.view.canY };
+    const lerp = (a, b, k) => ({ x: a.x + (b.x - a.x) * k, y: a.y + (b.y - a.y) * k });
+    const ease = k => 1 - (1 - k) * (1 - k);
+    let place;
+    if (pour.t < MOVE) { place = lerp(pour.from, at, ease(pour.t / MOVE)); this.can.ready = false; }
+    else if (pour.t < MOVE + TILT) {
+      place = at; this.can.ready = true;
+      if (!pour.spawned && pour.t >= MOVE + 160) {
+        pour.spawned = true;
+        const mouth = this.toNormalized(foodMouth(this.view, { ...this.can, ...at }));
+        const start = clamp(mouth.y, this.view.surfaceY, .35), id = ++this.nextPelletId;
+        this.pellets.push({ id, x: clamp(mouth.x, 8 / this.view.width, 1 - 8 / this.view.width), y: start, start,
+          born: this.time, grounded: false, ...(pour.forId && { forId: pour.forId }) });
+        pour.onSpawn?.(id);
+      }
+    } else if (pour.t < MOVE + TILT + BACK) { place = lerp(at, home, ease((pour.t - MOVE - TILT) / BACK)); this.can.ready = false; }
+    else { place = home; this.can.ready = false; this.pours.shift(); }
+    this.can.x = place.x; this.can.y = place.y;
+    this.can.moving = this.pours.length > 0;
+  }
 
   resize(width, height) {
     const previousWidth = this.view?.width;
@@ -159,14 +197,15 @@ export class AquariumSimulation {
     const blocked = this.canDispense() || (this.foodCount <= 0 ? '먹이가 부족해요' : '');
     if (blocked) { this.onFeedBlocked(blocked); return; }
     const mouth = this.toNormalized(foodMouth(this.view, this.can));
-    const count = Math.min(3, this.foodCount, 45 - this.pellets.length);
+    const count = Math.min(this.pourCount, this.foodCount, 45 - this.pellets.length);
+    const forId = this.feedTargetId;
     if (count <= 0) return;
     const spawn = amount => {
       for (let i = 0; i < Math.min(count, amount); i++) {
         const start = clamp(mouth.y, this.view.surfaceY, .35);
         this.pellets.push({ id: ++this.nextPelletId,
           x: clamp(mouth.x + (this.random() - .5) * 18 / this.view.width, 8 / this.view.width, 1 - 8 / this.view.width),
-          y: start, start, born: this.time + i * 120, grounded: false });
+          y: start, start, born: this.time + i * 120, grounded: false, ...(forId && { forId }) });
       }
     };
     if (!this.onDispense) {
@@ -190,6 +229,7 @@ export class AquariumSimulation {
     if (this.drag?.kind === 'food' && this.can.ready && this.time >= this.drag.nextDrop) {
       this.sprinkle(); this.drag.nextDrop = this.time + 550;
     }
+    if (!this.drag && this.pours.length) this.stepPour(dt);
     for (const f of this.fish.values()) {
       if (f.held || this.paused || this.time < f.until) continue;
       // 알갱이마다 먹을 물고기가 정해져 있다 (forId 없으면 내 물고기). 팀원 물고기에게 준 먹이는 그 물고기만 쫓아간다.

@@ -68,7 +68,7 @@ npm start
 |---|---|
 | 관리자 | `server/game/routes/admin.js`, `/community/admin.html` (새 스타일 시트 사용). `ADMIN_ENABLED`로 켜고 끔 |
 | DB 명령 | `npm run db:init`(초기화), `db:migrate`(데이터 유지, 예전 `db:game:init`), `seed`, `admin:create`. 스키마는 `sql/schema.sql` 하나 |
-| 팀원 물고기 먹이 | 원래 기획대로 다시 허용. 먹이 대상 목록에 팀원 물고기도 보이고, 떨어뜨린 먹이는 고른 물고기만 쫓아가 먹음 (`dropFood`의 `forId`). 드래그 먹이통은 그대로 내 물고기 전용 |
+| 팀원 물고기 먹이 | 원래 기획대로 다시 허용. 먹이 대상 목록에 팀원 물고기도 보이고, 떨어뜨린 먹이는 고른 물고기만 쫓아가 먹음 (`forId`). 먹이 주기 클릭 시 먹이통이 그 자리 위로 날아가 한 알을 붓고 돌아옴(`pourAt`). 먹이통을 끌어도 먹이 주기에서 고른 물고기(고르지 않았으면 내 물고기, 배부르면 덜 먹은 팀원 물고기)에게 한 알씩 부음. 내 물고기가 배불러도 먹이 주기가 열림 |
 | 실시간 연결 | 어항 화면이 `window.aquaScene`이 만들어지기 전에 설정을 붙이다 오류가 나서, 그 뒤의 Socket.IO 연결이 실행되지 않던 문제 수정 (준비 신호 `aquatank:ready`를 기다림) |
 | 보안 헤더 | `/community`, `/play`에 `connect-src 'self' data: blob:` 추가 (PixiJS가 내장 이미지를 fetch로 읽음) |
 | 명칭 | 아이템 `hat`의 서버 메시지·알림 문구를 화면과 같은 "꽃"으로 통일 |
