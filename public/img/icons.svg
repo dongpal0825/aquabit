@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg">
+  <!-- 16x16 픽셀 아이콘 모음. 사용: <svg><use href="/img/icons.svg#server"/></svg> -->
+  <symbol id="server" viewBox="0 0 16 16">
+    <path fill="currentColor" fill-rule="evenodd" d="M2 2h12v5H2zM3 3v3h10V3zM4 4h2v1H4zM2 9h12v5H2zM3 10v3h10v-3zM4 11h2v1H4z"/>
+  </symbol>
+  <symbol id="globe" viewBox="0 0 16 16">
+    <path fill="currentColor" fill-rule="evenodd" d="M5 1h6v1h2v2h1v2h1v4h-1v2h-1v2h-2v1H5v-1H3v-2H2v-2H1V6h1V4h1V2h2zM5 3v1H4v2H3v4h1v2h1v1h6v-1h1v-2h1V6h-1V4h-1V3zM7 3h2v10H7zM3 7h4v2H3zM9 7h4v2H9z"/>
+  </symbol>
+  <symbol id="code" viewBox="0 0 16 16">
+    <path fill="currentColor" d="M5 3h2v2H5zM3 5h2v2H3zM1 7h2v2H1zM3 9h2v2H3zM5 11h2v2H5zM9 3h2v2H9zM11 5h2v2h-2zM13 7h2v2h-2zM11 9h2v2h-2zM9 11h2v2H9z"/>
+  </symbol>
+  <symbol id="mail" viewBox="0 0 16 16">
+    <path fill="currentColor" fill-rule="evenodd" d="M1 3h14v10H1zM2 4v8h12V4zM3 5h2v1H3zM5 6h2v1H5zM7 7h2v1H7zM9 6h2v1H9zM11 5h2v1h-2z"/>
+  </symbol>
+  <symbol id="fish" viewBox="0 0 16 16">
+    <path fill="currentColor" fill-rule="evenodd" d="M3 4h6v1h2v1h1V5h1V4h2v8h-2v-1h-1v-1h-1v1H9v1H3v-1H2v-1H1V6h1V5h1zM3 7v1h1V7z"/>
+  </symbol>
+  <symbol id="users" viewBox="0 0 16 16">
+    <path fill="currentColor" d="M2 2h4v4H2zM10 2h4v4h-4zM1 7h6v7H1zM9 7h6v7H9z"/>
+  </symbol>
+  <symbol id="key" viewBox="0 0 16 16">
+    <path fill="currentColor" fill-rule="evenodd" d="M1 5h6v2h8v3h-2v2h-2v-2h-1v2H8v-2H7v1H1zM3 7v2h2V7z"/>
+  </symbol>
+  <symbol id="palette" viewBox="0 0 16 16">
+    <path fill="currentColor" fill-rule="evenodd" d="M5 1h6v1h2v1h1v2h1v4h-1v1h-3v1h-1v2h1v1h-1v1H5v-1H3v-1H2v-2H1V5h1V3h1V2h2zM4 4v2h2V4zM8 3v2h2V3zM11 6v2h2V6zM4 9v2h2V9z"/>
+  </symbol>
+  <symbol id="grow" viewBox="0 0 16 16">
+    <path fill="currentColor" d="M7 1h2v1h1v1h1v1h1v1h1v2H9v8H7V7H3V5h1V4h1V3h1V2h1z"/>
+  </symbol>
+  <symbol id="chat" viewBox="0 0 16 16">
+    <path fill="currentColor" fill-rule="evenodd" d="M1 2h14v9H8v1H7v1H6v1H4v-3H1zM4 6h2v2H4zM7 6h2v2H7zM10 6h2v2h-2z"/>
+  </symbol>
+  <symbol id="arrow" viewBox="0 0 16 16">
+    <path fill="currentColor" d="M2 7h8V5h1v1h1v1h1v2h-1v1h-1v1h-1V9H2zM8 3h2v2H8zM8 11h2v2H8z"/>
+  </symbol>
+  <symbol id="external" viewBox="0 0 16 16">
+    <path fill="currentColor" d="M9 1h6v6h-2V4h-1v1h-1v1h-1v1H9v1H8v1H6V7h1V6h1V5h1V4h1V3H9zM1 3h6v2H3v8h8V9h2v6H1z"/>
+  </symbol>
+  <symbol id="menu" viewBox="0 0 16 16">
+    <path fill="currentColor" d="M1 2h14v2H1zM1 7h14v2H1zM1 12h14v2H1z"/>
+  </symbol>
+  <symbol id="close" viewBox="0 0 16 16">
+    <path fill="currentColor" d="M2 2h2v1h1v1h1v1h1v1h2V5h1V4h1V3h1V2h2v2h-1v1h-1v1h-1v1h-1v2h1v1h1v1h1v1h1v2h-2v-1h-1v-1h-1v-1h-1v-1H7v1H6v1H5v1H4v1H2v-2h1v-1h1v-1h1v-1h1V7H5V6H4V5H3V4H2z"/>
+  </symbol>
+  <symbol id="plus" viewBox="0 0 16 16">
+    <path fill="currentColor" d="M7 2h2v5h5v2H9v5H7V9H2V7h5z"/>
+  </symbol>
+</svg>

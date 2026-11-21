@@ -6,12 +6,10 @@ CREATE DATABASE IF NOT EXISTS aquabit
   DEFAULT COLLATE utf8mb4_unicode_ci;
 USE aquabit;
 
-SET FOREIGN_KEY_CHECKS = 0;
-DROP TABLE IF EXISTS feedings, attendance, inventory, transactions, tasks, messages, fish, tank_members, tanks, users;
-SET FOREIGN_KEY_CHECKS = 1;
+-- 기존 테이블과 데이터를 삭제하지 않습니다.
 
 -- 회원
-CREATE TABLE users (
+CREATE TABLE IF NOT EXISTS users (
   id            INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
   username      VARCHAR(20)  NOT NULL UNIQUE,          -- 로그인 아이디 (영문/숫자/_ 4~20)
   password_hash VARCHAR(100) NOT NULL,                 -- bcrypt
@@ -22,7 +20,7 @@ CREATE TABLE users (
 ) ENGINE=InnoDB;
 
 -- 어항
-CREATE TABLE tanks (
+CREATE TABLE IF NOT EXISTS tanks (
   id          INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
   name        VARCHAR(20)  NOT NULL,
   invite_code CHAR(6)      NOT NULL UNIQUE,
@@ -32,7 +30,7 @@ CREATE TABLE tanks (
 ) ENGINE=InnoDB;
 
 -- 어항 참여자 (어항당 최대 10명은 서버에서 트랜잭션으로 검사)
-CREATE TABLE tank_members (
+CREATE TABLE IF NOT EXISTS tank_members (
   tank_id   INT UNSIGNED NOT NULL,
   user_id   INT UNSIGNED NOT NULL,
   joined_at DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -43,13 +41,14 @@ CREATE TABLE tank_members (
 ) ENGINE=InnoDB;
 
 -- 물고기 (어항마다 사람당 1마리)
-CREATE TABLE fish (
+CREATE TABLE IF NOT EXISTS fish (
   id           INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
   tank_id      INT UNSIGNED NOT NULL,
   user_id      INT UNSIGNED NOT NULL,
+  hue          SMALLINT UNSIGNED NULL,
   name         VARCHAR(12)  NOT NULL,
-  species      ENUM('goldfish','tropical','puffer') NOT NULL DEFAULT 'goldfish',
-  color        ENUM('orange','coral','lemon','mint','sky','grape') NOT NULL DEFAULT 'orange',
+  species      ENUM('goldfish','tropical','puffer','gold','angel','betta','guppy','neon','shrimp','mackerel','flounder','seabass','tuna','bream','sunfish','ocean1','ocean2','squid','smallfish','sardine','starfish') NOT NULL DEFAULT 'gold',
+  color        ENUM('original','orange','coral','lemon','mint','sky','grape') NOT NULL DEFAULT 'orange',
   accessory    ENUM('ribbon','hat','crown') NULL,     -- 착용 중인 장신구 (구매한 것만)
   food_total   INT UNSIGNED NOT NULL DEFAULT 0,       -- 받은 먹이 누적
   stage        TINYINT UNSIGNED NOT NULL DEFAULT 1,   -- 1 아기, 2 꼬마, 3 어른, 4 반짝 (내려가지 않음)
@@ -61,7 +60,7 @@ CREATE TABLE fish (
 ) ENGINE=InnoDB;
 
 -- 어항별 채팅
-CREATE TABLE messages (
+CREATE TABLE IF NOT EXISTS messages (
   id         BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
   tank_id    INT UNSIGNED NOT NULL,
   user_id    INT UNSIGNED NOT NULL,
@@ -73,7 +72,7 @@ CREATE TABLE messages (
 ) ENGINE=InnoDB;
 
 -- 과제
-CREATE TABLE tasks (
+CREATE TABLE IF NOT EXISTS tasks (
   id            INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
   tank_id       INT UNSIGNED NOT NULL,
   creator_id    INT UNSIGNED NOT NULL,                -- 대표
@@ -96,7 +95,7 @@ CREATE TABLE tasks (
 ) ENGINE=InnoDB;
 
 -- 진주 지급/사용 내역 (모든 변동 기록)
-CREATE TABLE transactions (
+CREATE TABLE IF NOT EXISTS transactions (
   id            BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
   user_id       INT UNSIGNED NOT NULL,
   tank_id       INT UNSIGNED NULL,
@@ -112,7 +111,7 @@ CREATE TABLE transactions (
 ) ENGINE=InnoDB;
 
 -- 보유 아이템 (먹이 수량, 구매한 장신구)
-CREATE TABLE inventory (
+CREATE TABLE IF NOT EXISTS inventory (
   user_id    INT UNSIGNED NOT NULL,
   item       ENUM('food','ribbon','hat','crown') NOT NULL,
   quantity   INT UNSIGNED NOT NULL DEFAULT 0,
@@ -122,7 +121,7 @@ CREATE TABLE inventory (
 ) ENGINE=InnoDB;
 
 -- 출석 (하루 1행, 날짜는 한국 시간 기준)
-CREATE TABLE attendance (
+CREATE TABLE IF NOT EXISTS attendance (
   user_id    INT UNSIGNED NOT NULL,
   att_date   DATE         NOT NULL,
   streak     SMALLINT UNSIGNED NOT NULL DEFAULT 1,   -- 연속 출석 일수
@@ -132,7 +131,7 @@ CREATE TABLE attendance (
 ) ENGINE=InnoDB;
 
 -- 먹이 주기 기록 (물고기당 하루 5회 제한 검사용)
-CREATE TABLE feedings (
+CREATE TABLE IF NOT EXISTS feedings (
   id         BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
   fish_id    INT UNSIGNED NOT NULL,
   feeder_id  INT UNSIGNED NOT NULL,

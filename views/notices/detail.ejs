@@ -1,0 +1,48 @@
+<%- include('../partials/head') %>
+<%- include('../partials/header') %>
+
+<main id="main">
+  <section class="section">
+    <div class="container container-narrow">
+      <a class="back-link" href="/notices">← 공지사항 목록</a>
+
+      <article class="article pixel-box">
+        <header class="article-head">
+          <span class="badge badge-<%= notice.category %>"><%= notice.categoryLabel %></span>
+          <h1 class="article-title"><%= notice.title %></h1>
+          <time datetime="<%= notice.date %>"><%= String(notice.date).replace(/-/g, '.') %></time>
+        </header>
+        <div class="article-body">
+          <% (Array.isArray(notice.body) ? notice.body : [notice.body]).forEach((para) => { %>
+            <p><%= para %></p>
+          <% }) %>
+        </div>
+      </article>
+
+      <nav class="adjacent" aria-label="이전 글, 다음 글">
+        <% if (older) { %>
+          <a class="adjacent-link" href="/notices/<%= older.id %>">
+            <span class="adjacent-label">이전 글</span>
+            <span class="adjacent-title"><%= older.title %></span>
+          </a>
+        <% } else { %>
+          <span class="adjacent-link is-empty"><span class="adjacent-label">이전 글</span><span class="adjacent-title">이전 글이 없습니다.</span></span>
+        <% } %>
+        <% if (newer) { %>
+          <a class="adjacent-link" href="/notices/<%= newer.id %>">
+            <span class="adjacent-label">다음 글</span>
+            <span class="adjacent-title"><%= newer.title %></span>
+          </a>
+        <% } else { %>
+          <span class="adjacent-link is-empty"><span class="adjacent-label">다음 글</span><span class="adjacent-title">가장 최근 글입니다.</span></span>
+        <% } %>
+      </nav>
+
+      <div class="center">
+        <a class="btn btn-ghost" href="/notices">목록으로</a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<%- include('../partials/footer') %>

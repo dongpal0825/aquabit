@@ -1,0 +1,59 @@
+[
+  {
+    "id": "infra-engineer",
+    "title": "가상화 인프라 엔지니어",
+    "team": "인프라팀",
+    "type": "정규직 (가상 공고)",
+    "location": "AQUABIT 본사 서버실",
+    "duties": [
+      "ESXi 호스트와 vCenter 운영, VM 생성·스냅샷·백업 관리",
+      "NFS 데이터스토어 용량 관리와 장애 대응",
+      "점검 일정 수립과 작업 문서화"
+    ],
+    "requirements": [
+      "가상화(ESXi, vCenter) 실습 경험",
+      "Linux, Windows Server 기본 운영 능력"
+    ],
+    "preferred": [
+      "팀 프로젝트에서 일정·문서를 총괄해 본 경험"
+    ]
+  },
+  {
+    "id": "network-engineer",
+    "title": "네트워크·DNS 엔지니어",
+    "team": "네트워크팀",
+    "type": "정규직 (가상 공고)",
+    "location": "AQUABIT 본사 서버실",
+    "duties": [
+      "1차·2차 네임서버 운영과 aquabit.lab 존 관리",
+      "존 전송(zone transfer) 설정과 동기화 점검",
+      "사내 서비스 도메인 레코드 관리"
+    ],
+    "requirements": [
+      "BIND 등 DNS 서버 구성 경험",
+      "A, CNAME, MX, NS, SOA 레코드에 대한 이해"
+    ],
+    "preferred": [
+      "nslookup, dig로 장애 원인을 찾아본 경험"
+    ]
+  },
+  {
+    "id": "game-server-developer",
+    "title": "게임 서버 개발자 (Pixel Aquarium)",
+    "team": "게임개발팀",
+    "type": "정규직 (가상 공고)",
+    "location": "AQUABIT 본사",
+    "duties": [
+      "Node.js 기반 Pixel Aquarium 서버 기능 개발",
+      "MySQL 스키마 설계와 쿼리 개선",
+      "Apache 리버스 프록시 환경에서 배포·운영"
+    ],
+    "requirements": [
+      "Node.js(Express)와 MySQL로 웹 서비스를 만들어 본 경험",
+      "Git을 이용한 협업 경험"
+    ],
+    "preferred": [
+      "픽셀 아트나 게임에 대한 관심"
+    ]
+  }
+]

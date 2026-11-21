@@ -1,0 +1,129 @@
+<%- include('partials/head') %>
+<%- include('partials/header') %>
+
+<main id="main">
+  <section class="page-hero">
+    <div class="container">
+      <p class="eyebrow">ABOUT AQUABIT</p>
+      <h1 class="page-title">회사 소개</h1>
+      <p class="page-lead">작은 어항 하나로 팀을 잇는 회사, AQUABIT입니다.</p>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="vision-title">
+    <div class="container vision">
+      <div>
+        <h2 id="vision-title" class="section-title">비전</h2>
+        <p class="vision-quote">“함께 만드는 시간이<br>함께 머무는 공간이 되도록”</p>
+      </div>
+      <div class="vision-body">
+        <p>팀 프로젝트는 회의록과 마감일만으로 이루어지지 않습니다. AQUABIT은 팀원들이 잠깐 들러 안부를 묻고, 서로의 물고기를 챙기며 가까워지는 공간을 만듭니다.</p>
+        <ul class="value-list">
+          <li><strong>가볍게</strong> 초대 코드 하나로 바로 모이는 어항</li>
+          <li><strong>따뜻하게</strong> 먹이를 주고 키우며 쌓이는 팀의 추억</li>
+          <li><strong>튼튼하게</strong> 직접 세운 가상화 인프라 위에서 동작하는 서비스</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="section section-tint" aria-labelledby="history-title">
+    <div class="container">
+      <h2 id="history-title" class="section-title">개발 연혁</h2>
+      <ol class="timeline">
+        <% history.forEach((h) => { %>
+          <li class="timeline-item">
+            <span class="timeline-date"><%= h.date %></span>
+            <div class="timeline-body pixel-box">
+              <h3><%= h.title %></h3>
+              <p><%= h.text %></p>
+            </div>
+          </li>
+        <% }) %>
+      </ol>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="team-title">
+    <div class="container">
+      <div class="section-head">
+        <h2 id="team-title" class="section-title">팀 구성</h2>
+        <p class="section-desc">네 명이 회사의 서버부터 서비스까지 나눠 맡았습니다.</p>
+      </div>
+      <ul class="team-grid">
+        <% team.forEach((m) => { %>
+          <li class="team-card pixel-box">
+            <span class="feature-icon tone-<%= m.color %>"><svg class="icon" aria-hidden="true"><use href="/img/icons.svg#<%= m.icon %>"/></svg></span>
+            <p class="team-role"><%= m.role %></p>
+            <h3><%= m.title %></h3>
+            <ul class="tag-list">
+              <% (m.tasks || []).forEach((t) => { %><li><%= t %></li><% }) %>
+            </ul>
+          </li>
+        <% }) %>
+      </ul>
+    </div>
+  </section>
+
+  <section class="section section-deep" aria-labelledby="infra-title">
+    <div class="container">
+      <div class="section-head">
+        <h2 id="infra-title" class="section-title">서비스 구성</h2>
+        <p class="section-desc">AQUABIT의 모든 서비스는 팀이 직접 만든 가상화 환경 위에서 동작합니다.</p>
+      </div>
+
+      <figure class="infra" aria-labelledby="infra-caption">
+        <div class="infra-host">
+          <div class="infra-host-label">
+            <span class="mono">ESXi Host</span>
+            <span class="infra-sub">vCenter로 관리 · NFS 데이터스토어</span>
+          </div>
+          <div class="infra-vms">
+            <div class="infra-vm tone-yellow">
+              <span class="mono">dns1</span>
+              <span>1차 네임서버</span>
+              <small>aquabit.lab 존 원본</small>
+            </div>
+            <div class="infra-vm tone-yellow">
+              <span class="mono">dns2</span>
+              <span>2차 네임서버</span>
+              <small>존 전송으로 복제</small>
+            </div>
+            <div class="infra-vm tone-violet">
+              <span class="mono">mail</span>
+              <span>사내 메일 서버</span>
+              <small>Windows Server · hMailServer</small>
+            </div>
+            <div class="infra-vm tone-mint">
+              <span class="mono">web</span>
+              <span>웹 서버</span>
+              <small>Apache → www / game (Node.js) · MySQL</small>
+            </div>
+          </div>
+        </div>
+        <figcaption id="infra-caption">ESXi 호스트 하나에 네 대의 가상 머신이 올라가 있고, vCenter에서 한꺼번에 관리합니다.</figcaption>
+      </figure>
+
+      <ul class="service-grid">
+        <li class="service-card pixel-box">
+          <h3><svg class="icon" aria-hidden="true"><use href="/img/icons.svg#server"/></svg> ESXi / vCenter 가상화</h3>
+          <p>ESXi 호스트 위에 서버를 가상 머신으로 나눠 올리고, vCenter로 생성·스냅샷·모니터링을 관리합니다. VM 디스크는 NFS 데이터스토어에 둡니다.</p>
+        </li>
+        <li class="service-card pixel-box">
+          <h3><svg class="icon" aria-hidden="true"><use href="/img/icons.svg#globe"/></svg> 1차·2차 네임서버</h3>
+          <p><span class="mono">aquabit.lab</span> 도메인을 1차 네임서버가 관리하고, 존 전송으로 2차 네임서버에 복제해 한 대가 멈춰도 이름 풀이가 계속됩니다.</p>
+        </li>
+        <li class="service-card pixel-box">
+          <h3><svg class="icon" aria-hidden="true"><use href="/img/icons.svg#mail"/></svg> 사내 메일 서버</h3>
+          <p>Windows Server의 hMailServer가 <span class="mono">@aquabit.lab</span> 메일을 주고받습니다. 고객센터 문의도 이 서버를 거쳐 담당자에게 전달됩니다.</p>
+        </li>
+        <li class="service-card pixel-box">
+          <h3><svg class="icon" aria-hidden="true"><use href="/img/icons.svg#code"/></svg> 웹 서버</h3>
+          <p>Apache가 <span class="mono">www.aquabit.lab</span>(회사 홈페이지)과 <span class="mono">game.aquabit.lab</span>(게임 서비스) 요청을 각 Node.js 앱으로 전달하고, 게임 데이터는 MySQL에 저장합니다.</p>
+        </li>
+      </ul>
+    </div>
+  </section>
+</main>
+
+<%- include('partials/footer') %>

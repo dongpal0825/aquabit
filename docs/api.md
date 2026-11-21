@@ -1,8 +1,8 @@
 # AQUABIT API
 
-- 기본 경로: `/api`
+- 기본 경로: `/api/game` (게임 API. 회사 홈페이지는 EJS 화면이라 별도 API가 거의 없음)
 - 요청/응답 본문: JSON (`Content-Type: application/json`)
-- 인증: 로그인하면 `aquabit.sid` 세션 쿠키가 발급됩니다 (express-session, MySQL 저장). 이후 요청은 쿠키로 인증합니다.
+- 인증: 로그인하면 `aquabit.game` 세션 쿠키가 발급됩니다 (express-session, MySQL 저장). 이후 요청은 쿠키로 인증합니다.
 - 오류 응답: `{ "error": "사용자에게 보여 줄 한국어 메시지", "code": "선택적 오류 코드" }`
 
 | 상태 | 의미 |
@@ -12,13 +12,15 @@
 | 403 | 권한 없음 |
 | 404 | 없거나 참여하지 않은 어항 |
 
-> 1~5단계 전체 기준입니다.
+> 통합 버전 기준 (회사 홈페이지 + 팀 어항). `.env`에 `GAME_DATABASE_ENABLED=true`일 때만 동작하고, 아니면 503(`DATABASE_NOT_CONFIGURED`)과 함께 화면의 "체험하기"를 안내합니다.
+>
+> 같은 사이트에서 온 요청만 받습니다: 쓰기 요청(POST/PATCH/DELETE)은 `Content-Type: application/json`이어야 하고(아니면 415), `Origin`이 다른 사이트면 403입니다. 로그인/가입은 같은 IP에서 1분에 10번까지(넘으면 429).
 
 ---
 
 ## 인증
 
-### POST /api/auth/register
+### POST /api/game/auth/register
 회원가입 후 바로 로그인 상태가 됩니다.
 
 ```json
@@ -30,23 +32,23 @@
 
 응답 201: `{ "user": { "id", "username", "nickname", "pearls" } }`
 
-### POST /api/auth/login
+### POST /api/game/auth/login
 ```json
 { "username": "test1", "password": "aquabit123" }
 ```
 응답 200: `{ "user": {...} }` / 실패 401 `BAD_LOGIN`
 
-### POST /api/auth/logout
+### POST /api/game/auth/logout
 세션 삭제. 응답 `{ "ok": true }`
 
-### GET /api/auth/me
+### GET /api/game/auth/me
 현재 로그인한 사용자. 응답 `{ "user": {...} }` / 401
 
 ---
 
 ## 어항
 
-### GET /api/tanks
+### GET /api/game/tanks
 내가 참여한 어항 목록.
 
 ```json
@@ -54,11 +56,11 @@
   "id": 1, "name": "클라우드 7팀", "inviteCode": "AQUA77",
   "isOwner": true, "ownerNickname": "민규",
   "memberCount": 3, "maxMembers": 10,
-  "myFish": { "species": "goldfish", "color": "orange", "stage": 3, "accessory": "ribbon" }
+  "myFish": { "species": "gold", "color": "original", "hue": null, "stage": 3, "accessory": "ribbon" }
 } ] }
 ```
 
-### POST /api/tanks
+### POST /api/game/tanks
 어항 만들기. 만든 사람이 대표가 되고 6자리 초대 코드(헷갈리는 0 O 1 I L 제외)가 발급되며, 대표의 물고기가 생깁니다.
 
 ```json
@@ -66,7 +68,7 @@
 ```
 응답 201: `{ "tank": { "id", "name", "inviteCode" } }`
 
-### POST /api/tanks/join
+### POST /api/game/tanks/join
 초대 코드로 참여. 대소문자 구분 없음. 참여하면 내 물고기가 생깁니다.
 
 ```json
@@ -78,7 +80,7 @@
 
 인원 검사는 어항 행을 `SELECT ... FOR UPDATE`로 잠근 트랜잭션 안에서 해서 동시에 들어와도 10명을 넘지 않습니다.
 
-### GET /api/tanks/:tankId
+### GET /api/game/tanks/:tankId
 어항 상세 (참여자만).
 
 ```json
@@ -88,7 +90,7 @@
   "members": [ { "userId": 1, "nickname": "민규", "isOwner": true, "joinedAt": "..." } ],
   "fish": [ {
     "id": 1, "tankId": 1, "userId": 1, "ownerNickname": "민규",
-    "name": "뽀글이", "species": "goldfish", "color": "orange", "accessory": "ribbon",
+    "name": "뽀글이", "species": "gold", "color": "original", "hue": null, "accessory": "ribbon",
     "foodTotal": 17, "stage": 3, "stageName": "어른",
     "nextStageAt": 40, "foodToNext": 23,
     "status": "healthy", "lastFedAt": "...",
@@ -98,14 +100,16 @@
   "serverTime": "..."
 }
 ```
-- `species`: `goldfish` 금붕어 / `tropical` 열대어 / `puffer` 복어
-- `color`: `orange` `coral` `lemon` `mint` `sky` `grape`
+- `species`: `gold` 금붕어 / `guppy` 구피 / `betta` 베타 / `neon` 네온테트라 / `shrimp` 새우 / `angel` 엔젤피쉬 / `starfish` 불가사리 (예전 값 `goldfish`, `tropical`, `puffer` 등은 `game/domain/creature-aliases.json`으로 새 종류에 연결)
+- `color`: `original`(그림 원래 색) `orange` `coral` `lemon` `mint` `sky` `grape`
+- `hue`: 0~359 또는 `null`. 꾸미기 화면의 색상 슬라이더 값 (PNG는 그대로 두고 화면에서 색만 바꿈)
+- 장신구는 레벨이 되어야 착용 가능: 리본 Lv.2, 꽃(`hat`) Lv.3, 왕관 Lv.4 (상점에서 산 것만)
 - `stage`: 1 아기(0) → 2 꼬마(5) → 3 어른(15) → 4 반짝(40), 내려가지 않음
 - `status`: `healthy` 건강함 / `hungry` 24시간 굶음 / `sad` 72시간 굶음 (`TIME_SCALE` 반영)
 - `fedToday`: 오늘(한국 시간) 받은 먹이 수, 하루 최대 5
 - `pendingTasks`: 내가 처리할 과제 수 (대표: 검토 대기, 팀원: 할 일 + 반려됨). 액션 바의 빨간 배지
 
-### POST /api/tanks/:tankId/leave
+### POST /api/game/tanks/:tankId/leave
 어항 나가기 (팀원만). 대표는 400 `OWNER_CANNOT_LEAVE` (먼저 대표를 넘기거나 어항 삭제).
 
 - 내 물고기와 먹이 기록이 지워지고, 내가 맡은 **끝나지 않은** 과제(todo, submitted, rejected)도 지워집니다.
@@ -113,7 +117,7 @@
 
 응답: `{ "ok": true, "removedTasks": 1 }` / 소켓 `member:left`
 
-### POST /api/tanks/:tankId/transfer
+### POST /api/game/tanks/:tankId/transfer
 대표 넘기기 (대표만, 이 어항의 다른 팀원에게).
 
 ```json
@@ -124,7 +128,7 @@
 
 응답: `{ "ok": true, "ownerId": 2, "removedTasks": 0 }` / 소켓 `tank:owner-changed`
 
-### DELETE /api/tanks/:tankId
+### DELETE /api/game/tanks/:tankId
 어항 삭제 (대표만). 실수 방지를 위해 어항 이름을 그대로 보내야 합니다 (다르면 400 `CONFIRM_MISMATCH`).
 
 ```json
@@ -139,17 +143,17 @@
 
 ## 물고기
 
-### PATCH /api/tanks/:tankId/fish/me
+### PATCH /api/game/tanks/:tankId/fish/me
 내 물고기 꾸미기. 바꿀 항목만 보내면 됩니다.
 
 ```json
-{ "name": "뽀글이", "species": "tropical", "color": "mint", "accessory": "crown" }
+{ "name": "뽀글이", "species": "angel", "color": "mint", "hue": 155, "accessory": "crown" }
 ```
 - `accessory`: `ribbon` `hat` `crown` 또는 `null`(벗기). 상점에서 산 것만 (아니면 400 `NOT_OWNED`)
 
 응답: `{ "fish": {...} }` / 소켓 `fish:updated`
 
-### POST /api/tanks/:tankId/fish/:fishId/feed
+### POST /api/game/tanks/:tankId/fish/:fishId/feed
 내 먹이 1개를 이 어항의 물고기(내 것 또는 팀원 것)에게 줍니다.
 
 - 먹이 없음: 400 `NO_FOOD`
@@ -165,7 +169,7 @@
 
 ## 지갑, 출석, 상점
 
-### GET /api/me/wallet
+### GET /api/game/me/wallet
 ```json
 {
   "pearls": 160,
@@ -174,7 +178,7 @@
 }
 ```
 
-### POST /api/me/attendance
+### POST /api/game/me/attendance
 하루 첫 접속 출석. 어항 목록과 어항 화면이 열릴 때 부릅니다. 하루에 한 번만 지급 (한국 시간 기준).
 
 - 출석 10진주, 연속 7일째마다 보너스 30진주 (7, 14, 21...일)
@@ -185,7 +189,7 @@
 ```
 소켓: 내가 들어간 모든 어항에 `attendance`
 
-### GET /api/me/transactions?limit=50
+### GET /api/game/me/transactions?limit=50
 진주 지급/사용 내역 (최신순, 최대 100).
 
 ```json
@@ -193,7 +197,7 @@
 ```
 `type`: `attendance` `streak_bonus` `task_reward` `buy_food` `buy_accessory` `seed`
 
-### GET /api/shop
+### GET /api/game/shop
 ```json
 { "items": [
   { "item": "food", "label": "먹이", "price": 5, "stackable": true },
@@ -203,7 +207,7 @@
 ] }
 ```
 
-### POST /api/shop/buy
+### POST /api/game/shop/buy
 ```json
 { "item": "food", "quantity": 5 }
 ```
@@ -216,7 +220,7 @@
 
 ## 과제
 
-모두 `/api/tanks/:tankId/tasks` 아래, 어항 참여자만.
+모두 `/api/game/tanks/:tankId/tasks` 아래, 어항 참여자만.
 
 | 상태 | 뜻 |
 |---|---|
@@ -225,7 +229,7 @@
 | `approved` | 승인됨 (진주 지급 완료) |
 | `rejected` | 반려됨 (담당자가 다시 제출 가능) |
 
-### GET /api/tanks/:tankId/tasks
+### GET /api/game/tanks/:tankId/tasks
 ```json
 {
   "tasks": [ {
@@ -239,7 +243,7 @@
 }
 ```
 
-### POST /api/tanks/:tankId/tasks (대표만)
+### POST /api/game/tanks/:tankId/tasks (대표만)
 ```json
 { "title": "발표 자료 만들기", "assigneeId": 2, "reward": 50, "dueDate": "2026-11-20" }
 ```
@@ -247,16 +251,16 @@
 - 담당자는 이 어항 팀원, 대표 본인은 불가 (400 `SELF_ASSIGN`)
 - 대표가 아니면 403
 
-### POST /api/tanks/:tankId/tasks/:taskId/submit (담당자만)
+### POST /api/game/tanks/:tankId/tasks/:taskId/submit (담당자만)
 ```json
 { "proofUrl": "https://github.com/team/repo/pull/3", "memo": "프록시 설정 끝" }
 ```
 `todo` 또는 `rejected`일 때만. 링크는 http(s) 주소, 메모는 선택(500자).
 
-### POST /api/tanks/:tankId/tasks/:taskId/approve (대표만)
+### POST /api/game/tanks/:tankId/tasks/:taskId/approve (대표만)
 `submitted`일 때만. 담당자에게 보상 진주를 지급하고 transactions에 `task_reward`로 기록합니다.
 
-### POST /api/tanks/:tankId/tasks/:taskId/reject (대표만)
+### POST /api/game/tanks/:tankId/tasks/:taskId/reject (대표만)
 ```json
 { "reason": "스크린샷도 붙여 주세요" }
 ```
@@ -266,7 +270,7 @@
 
 ## 채팅
 
-### GET /api/tanks/:tankId/messages
+### GET /api/game/tanks/:tankId/messages
 - 쿼리 없음: 최근 50개 (오래된 것부터)
 - `?after=<id>`: 그 id 이후 메시지만 (1단계 폴링용, 최대 100개)
 
@@ -274,7 +278,7 @@
 { "messages": [ { "id": 4, "userId": 1, "nickname": "민규", "body": "안녕하세요", "createdAt": "..." } ] }
 ```
 
-### POST /api/tanks/:tankId/messages
+### POST /api/game/tanks/:tankId/messages
 ```json
 { "body": "안녕하세요" }
 ```
@@ -284,9 +288,9 @@
 
 ## 관리자 (`ADMIN_ENABLED=true`일 때만)
 
-모두 `/api/admin` 아래, `users.is_admin = 1`인 계정만 (아니면 403, 꺼져 있으면 404).
+모두 `/api/game/admin` 아래, `users.is_admin = 1`인 계정만 (아니면 403, 꺼져 있으면 404).
 관리자 계정은 `server/.env`의 `ADMIN_USERNAME`, `ADMIN_PASSWORD`로 `npm run seed` 또는 `npm run admin:create`가 만듭니다.
-`GET /api/auth/me`의 `user.isAdmin`으로 관리자인지 알 수 있습니다.
+`GET /api/game/auth/me`의 `user.isAdmin`으로 관리자인지 알 수 있습니다.
 
 | 메서드 | 경로 | 설명 |
 |---|---|---|
@@ -304,14 +308,14 @@
 
 ## 기타
 
-### GET /api/health
+### GET /api/game/health
 `{ "ok": true, "timeScale": 1 }`
 
 ---
 
 ## Socket.IO 이벤트
 
-- 경로: `/socket.io` (운영에서는 Apache가 Node로 프록시, WebSocket은 `mod_proxy_wstunnel`)
+- 경로: `/game-socket.io` (운영에서는 Apache가 Node로 프록시, WebSocket은 `mod_proxy_wstunnel` 규칙 필요). 클라이언트 스크립트는 `/game-socket.io/socket.io.js`
 - 인증: 로그인 세션 쿠키를 그대로 씁니다. 로그인 안 된 연결은 `auth:required`를 받고 끊깁니다.
 - 방: `tank:<id>` 같은 어항 사람들, `user:<id>` 나 혼자
 - 연결이 끊기면 화면은 자동으로 폴링(채팅 2초, 어항 5초)으로 돌아가고, 다시 연결되면 빠진 채팅을 `?after=`로 채웁니다.

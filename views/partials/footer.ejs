@@ -1,0 +1,36 @@
+<footer class="site-footer">
+  <div class="pixel-wave" aria-hidden="true"></div>
+  <div class="container footer-inner">
+    <div class="footer-brand">
+      <img src="/img/logo-light.svg" alt="AQUABIT" width="174" height="27">
+      <p>팀 프로젝트 팀을 위한 픽셀 아쿠아리움을 만듭니다.</p>
+      <p class="footer-note">AQUABIT은 클라우드 컴퓨팅 수업 팀 프로젝트용 <strong>가상 회사</strong>이며 실제 회사가 아닙니다.</p>
+    </div>
+    <nav class="footer-links" aria-label="바닥글 메뉴">
+      <h2 class="footer-title">사이트</h2>
+      <ul>
+        <li><a href="/about">회사 소개</a></li>
+        <li><a href="/game">게임 소개</a></li>
+        <li><a href="/notices">공지사항</a></li>
+        <li><a href="/careers">채용</a></li>
+        <li><a href="/support">고객센터</a></li>
+      </ul>
+    </nav>
+    <div class="footer-links">
+      <h2 class="footer-title">서비스</h2>
+      <ul>
+        <li><a href="<%= gameUrl %>">Pixel Aquarium</a></li>
+        <li><span class="mono">www.aquabit.lab</span></li>
+        <li><span class="mono">support@aquabit.lab</span></li>
+      </ul>
+    </div>
+  </div>
+  <div class="container footer-bottom">
+    <p>&copy; <%= year %> AQUABIT. Cloud Computing Team Project.</p>
+  </div>
+</footer>
+<% (locals.scripts || []).forEach((src) => { %>
+<script src="<%= src %>" defer></script>
+<% }) %>
+</body>
+</html>

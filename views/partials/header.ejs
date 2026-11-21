@@ -1,0 +1,37 @@
+<%
+  const navItems = [
+    { href: '/about', label: '회사 소개' },
+    { href: '/game', label: '게임 소개' },
+    { href: '/notices', label: '공지사항' },
+    { href: '/careers', label: '채용' },
+    { href: '/support', label: '고객센터' },
+  ];
+  const isActive = (href) => currentPath === href || currentPath.startsWith(href + '/');
+%>
+<header class="site-header">
+  <div class="container header-inner">
+    <a class="brand" href="/" aria-label="AQUABIT 홈">
+      <img src="/img/logo.svg" alt="AQUABIT" width="174" height="27">
+    </a>
+
+    <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav">
+      <svg class="icon icon-open" aria-hidden="true"><use href="/img/icons.svg#menu"/></svg>
+      <svg class="icon icon-close" aria-hidden="true"><use href="/img/icons.svg#close"/></svg>
+      <span class="visually-hidden">메뉴 열기</span>
+    </button>
+
+    <nav class="site-nav" id="site-nav" aria-label="주 메뉴">
+      <ul>
+        <% navItems.forEach((item) => { %>
+          <li>
+            <a href="<%= item.href %>"<% if (isActive(item.href)) { %> aria-current="page"<% } %>><%= item.label %></a>
+          </li>
+        <% }) %>
+      </ul>
+      <a class="btn btn-play btn-sm" href="<%= gameUrl %>">
+        게임 시작
+        <svg class="icon" aria-hidden="true"><use href="/img/icons.svg#arrow"/></svg>
+      </a>
+    </nav>
+  </div>
+</header>

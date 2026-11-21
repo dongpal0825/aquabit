@@ -1,0 +1,60 @@
+<%- include('../partials/head') %>
+<%- include('../partials/header') %>
+<%
+  const listUrl = (cat, p) => {
+    const q = new URLSearchParams();
+    if (cat) q.set('category', cat);
+    if (p && p > 1) q.set('page', p);
+    const s = q.toString();
+    return '/notices' + (s ? '?' + s : '');
+  };
+  const tabs = [['', '전체'], ...Object.entries(categories)];
+%>
+
+<main id="main">
+  <section class="page-hero">
+    <div class="container">
+      <p class="eyebrow">NOTICE</p>
+      <h1 class="page-title">공지사항</h1>
+      <p class="page-lead">AQUABIT과 Pixel Aquarium의 새 소식을 알려 드립니다.</p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <nav class="tabs" aria-label="공지 분류">
+        <% tabs.forEach(([key, label]) => { %>
+          <a class="tab" href="<%= listUrl(key) %>"<% if (category === key) { %> aria-current="page"<% } %>><%= label %></a>
+        <% }) %>
+      </nav>
+
+      <p class="list-count">총 <strong><%= total %></strong>건</p>
+
+      <% if (notices.length) { %>
+        <ul class="notice-list">
+          <% notices.forEach((n) => { %>
+            <li>
+              <a class="notice-row" href="/notices/<%= n.id %>">
+                <span class="badge badge-<%= n.category %>"><%= n.categoryLabel %></span>
+                <span class="notice-row-title"><%= n.title %></span>
+                <time datetime="<%= n.date %>"><%= String(n.date).replace(/-/g, '.') %></time>
+              </a>
+            </li>
+          <% }) %>
+        </ul>
+      <% } else { %>
+        <p class="empty pixel-box">이 분류에는 아직 공지가 없습니다.</p>
+      <% } %>
+
+      <% if (totalPages > 1) { %>
+        <nav class="pagination" aria-label="페이지">
+          <% for (let p = 1; p <= totalPages; p++) { %>
+            <a href="<%= listUrl(category, p) %>"<% if (p === page) { %> aria-current="page"<% } %>><%= p %></a>
+          <% } %>
+        </nav>
+      <% } %>
+    </div>
+  </section>
+</main>
+
+<%- include('../partials/footer') %>

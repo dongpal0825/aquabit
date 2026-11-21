@@ -1,12 +1,44 @@
+# 패키지 (npm install로 다시 설치되므로 올리지 않음)
 node_modules/
-.env
-sql/*.local.sql
-shots/
+.reference/
 
-# 로컬 도구 설정, 작업용 파일
-.claude/
-*.zip
+# 게임 빌드 결과 (npm run build / npm start가 생성)
+public/play/
+
+# 비밀번호, 환경 설정 (DB, 세션 키, SMTP 비밀번호 등)
+.env
+.env.*
+!.env.example
+server/.env
+sql/*.local.sql
 
 # 개인 메모 (비밀번호)
 key.txt
 *.key.txt
+
+# 접수된 문의, 채팅, 보낸 메일 (개인정보)
+data/inquiries.json
+data/aquarium-chat.json
+data/aquarium-chat.json.tmp
+data/aquarium-sent-mail.json
+data/aquarium-sent-mail.json.tmp
+
+# 팀원에게 받은 원본 프로젝트 (통합 후 참고용, 올리지 않음)
+art_soo/
+
+# 로그, 임시
+*.log
+npm-debug.log*
+logs/
+shots/
+*.zip
+
+# 에디터, Claude Code 개인 설정
+.claude/
+.vscode/
+.idea/
+
+# 운영체제
+.DS_Store
+Thumbs.db
+desktop.ini

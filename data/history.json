@@ -1,0 +1,8 @@
+[
+  { "date": "2026.09", "title": "AQUABIT 설립", "text": "클라우드 컴퓨팅 팀 프로젝트로 4명이 모여 가상 게임 회사 AQUABIT을 세웠습니다." },
+  { "date": "2026.09", "title": "가상화 기반 구축", "text": "ESXi 호스트와 vCenter, NFS 데이터스토어로 회사 서버의 바탕을 만들었습니다." },
+  { "date": "2026.10", "title": "네임서버 개통", "text": "1차·2차 네임서버를 세우고 존 전송으로 aquabit.lab 도메인을 이중화했습니다." },
+  { "date": "2026.10", "title": "사내 메일 서버 개통", "text": "Windows Server에 hMailServer를 설치해 @aquabit.lab 메일을 쓰기 시작했습니다." },
+  { "date": "2026.11", "title": "Pixel Aquarium 오픈", "text": "팀 프로젝트 팀을 위한 픽셀 아쿠아리움 커뮤니티를 game.aquabit.lab에 열었습니다." },
+  { "date": "2026.11", "title": "회사 홈페이지 오픈", "text": "www.aquabit.lab 회사 홈페이지를 열고 공지·고객센터 창구를 마련했습니다." }
+]
