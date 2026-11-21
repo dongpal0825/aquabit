@@ -7,14 +7,7 @@
   const dest = (u) => (u && u.isAdmin && !next ? '/community/admin.html' : safeNext);
   Aqua.currentUser().then((u) => { if (u) location.replace(dest(u)); });
 
-  // 배경 어항
-  const scene = new TankScene(document.getElementById('bgTank'), { labels: false, interactive: false, maxBubbles: 10 });
-  scene.setFish([
-    { id: 1, species: 'goldfish', color: 'orange', stage: 2, status: 'healthy' },
-    { id: 2, species: 'tropical', color: 'mint', stage: 3, status: 'healthy' },
-    { id: 3, species: 'puffer', color: 'grape', stage: 1, status: 'healthy' },
-  ]);
-  scene.start();
+  // 배경 어항은 랜딩페이지와 같은 /js/aquarium.js가 #aquarium-canvas에 그린다
 
   const tabs = { login: document.getElementById('tabLogin'), register: document.getElementById('tabRegister') };
   const forms = { login: document.getElementById('loginForm'), register: document.getElementById('registerForm') };

@@ -1,0 +1,228 @@
+/* =========================================================
+   랜딩페이지(회사 홈페이지)와 같은 모양으로 맞추는 스킨
+   - 로그인, 내 어항, 관리자 화면에서 base.css / pages.css / admin.css 뒤에 불러온다.
+   - 색, 글꼴, 테두리, 그림자는 public/css/style.css의 값을 그대로 쓴다.
+   - <body class="site-skin">일 때만 적용 (어항 게임 화면에는 영향 없음)
+   ========================================================= */
+
+.site-skin {
+  --ink: #0b1d3a;
+  --ink-soft: #4a5f7f;
+  --deep: #0f2f5c;
+  --lagoon: #1565c0;
+  --wave: #2b8be8;
+  --aqua: #4fd1e8;
+  --foam: #e3f6ff;
+  --paper: #f4fbff;
+  --sand: #ffe6a3;
+  --yellow: #ffd34e;
+  --coral: #ff7a6b;
+  --mint: #5fe3b0;
+  --pearl: #ffffff;
+
+  --border: 3px solid var(--ink);
+  --shadow: 6px 6px 0 var(--ink);
+  --shadow-sm: 4px 4px 0 var(--ink);
+  --font-body: system-ui, -apple-system, "Segoe UI", "Malgun Gothic", "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
+  --font-pixel: ui-monospace, "Cascadia Mono", Consolas, "DejaVu Sans Mono", "Liberation Mono", monospace;
+  --font-pixel-big: var(--font-body);
+
+  margin: 0;
+  min-height: 100vh;
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 1.6;
+  color: var(--ink);
+  background: var(--paper);
+  word-break: keep-all;
+}
+.site-skin.sea-bg { background: var(--paper); }
+.site-skin .pixel { font-family: var(--font-pixel); font-weight: 700; letter-spacing: .02em; }
+.site-skin :focus-visible { outline: 3px solid var(--yellow); outline-offset: 2px; box-shadow: 0 0 0 6px var(--ink); }
+
+/* ---------- 상단 머리글 (랜딩 .site-header와 같은 모양) ---------- */
+.site-top {
+  position: sticky; top: 0; z-index: 20;
+  background: var(--paper);
+  border-bottom: var(--border);
+}
+.site-top-inner {
+  display: flex; align-items: center; justify-content: space-between; gap: 16px;
+  max-width: 1120px; min-height: 68px; margin: 0 auto; padding: 0 20px;
+}
+.site-top .brand { display: block; flex: none; }
+.site-top .brand img { width: 174px; height: auto; image-rendering: pixelated; }
+.site-top .bar-user { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; justify-content: flex-end; }
+.site-top .bar-nick { font-family: var(--font-body); font-weight: 700; font-size: 15px; }
+.site-top .bar-pearls {
+  display: inline-flex; align-items: center; gap: 6px;
+  margin: 0; padding: 4px 10px;
+  background: var(--sand); border: 2px solid var(--ink); box-shadow: none;
+  font-size: 15px;
+}
+.site-top .badge {
+  padding: 2px 10px; font-size: .8rem; font-weight: 800;
+  background: var(--yellow); border: 2px solid var(--ink);
+}
+.site-top .top-left { display: flex; align-items: center; gap: 12px; }
+
+/* ---------- 버튼 (랜딩 .btn) ---------- */
+.site-skin .btn {
+  --btn-bg: #fff;
+  display: inline-flex; align-items: center; justify-content: center; gap: .5em;
+  min-height: 0; padding: 11px 20px;
+  font: inherit; font-family: var(--font-body); font-weight: 800; font-size: 15px; line-height: 1.2; letter-spacing: .02em;
+  color: var(--ink); background: var(--btn-bg); text-decoration: none;
+  border: var(--border); border-radius: 0;
+  box-shadow: var(--shadow-sm), inset -4px -4px 0 rgba(11, 29, 58, .18);
+  filter: none; cursor: pointer;
+  transition: transform .08s steps(2), box-shadow .08s steps(2);
+}
+.site-skin .btn:hover { filter: none; transform: translate(-2px, -2px); box-shadow: 6px 6px 0 var(--ink), inset -4px -4px 0 rgba(11, 29, 58, .18); }
+.site-skin .btn:active:not(:disabled) { transform: translate(4px, 4px); box-shadow: 0 0 0 var(--ink), inset 4px 4px 0 rgba(11, 29, 58, .18); }
+.site-skin .btn:disabled { opacity: .55; cursor: not-allowed; transform: none; }
+.site-skin .btn--sea { --btn-bg: var(--yellow); color: var(--ink); }      /* 주 버튼 = 랜딩의 "게임 시작" 노란 버튼 */
+.site-skin .btn--foam { --btn-bg: var(--foam); }
+.site-skin .btn--coral { --btn-bg: var(--coral); color: var(--ink); }
+.site-skin .btn--big { padding: 15px 26px; font-size: 17px; }
+.site-skin .btn--small { padding: 7px 12px; font-size: 14px; box-shadow: 3px 3px 0 var(--ink), inset -3px -3px 0 rgba(11, 29, 58, .18); }
+.site-skin .btn--small:hover { box-shadow: 5px 5px 0 var(--ink), inset -3px -3px 0 rgba(11, 29, 58, .18); }
+
+/* ---------- 상자, 입력 ---------- */
+.site-skin .panel {
+  background: #fff;
+  border: var(--border);
+  box-shadow: var(--shadow);
+  border-radius: 0;
+}
+.site-skin .panel--glass { background: #fff; backdrop-filter: none; }
+.site-skin .field label { font-family: var(--font-body); font-weight: 700; font-size: 14px; color: var(--ink); }
+.site-skin .field label small { font-weight: 400; color: var(--ink-soft); opacity: 1; }
+.site-skin .input {
+  width: 100%; padding: 11px 12px;
+  font: inherit; font-size: 16px; color: var(--ink);
+  background: #fff; border: var(--border); border-radius: 0; box-shadow: none;
+}
+.site-skin .input:focus { outline: 3px solid var(--yellow); outline-offset: 0; box-shadow: 0 0 0 6px var(--ink); }
+.site-skin .form-error { color: #d23c3c; font-weight: 700; }
+.site-skin .tag { font-family: var(--font-body); font-weight: 800; border: 2px solid var(--ink); box-shadow: none; }
+
+/* ---------- 바다 배너 (랜딩 .page-hero, 모래 경계 포함) ---------- */
+.site-hero {
+  color: #fff;
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 4' shape-rendering='crispEdges'%3E%3Cpath fill='%23f4fbff' d='M0 2h4V1h4v1h4v1h4v1H0z'/%3E%3C/svg%3E") repeat-x left bottom / 64px 16px,
+    linear-gradient(180deg, var(--lagoon), var(--deep));
+}
+.site-hero-inner { max-width: 1120px; margin: 0 auto; padding: 40px 20px 56px; }
+.site-hero .eyebrow {
+  display: inline-block; margin: 0 0 12px;
+  font-family: var(--font-pixel); font-weight: 700; font-size: .85rem; letter-spacing: .18em;
+  color: var(--ink); background: var(--aqua); padding: 2px 10px; border: 2px solid var(--ink);
+}
+.site-hero-title { margin: 0 0 8px; font-size: clamp(1.9rem, 4.5vw, 2.6rem); font-weight: 900; line-height: 1.25; text-shadow: 4px 4px 0 var(--ink); }
+.site-hero-lead { margin: 0; font-size: 1.05rem; color: #dcefff; text-shadow: 2px 2px 0 var(--ink); }
+
+/* =========================================================
+   로그인: 랜딩 메인 배너의 바다(Canvas 픽셀 아쿠아리움) 위에 카드
+   ========================================================= */
+/* pages.css의 place-items:center가 블록 배치에서도 자식을 좁게 만들므로 되돌린다 */
+.site-skin.auth-page { display: block; place-items: normal; padding: 0; overflow-x: hidden; }
+.auth-sea {
+  position: relative; overflow: hidden;
+  display: grid; place-items: center;
+  min-height: calc(100vh - 71px);
+  padding: 40px 16px 72px;
+  background: linear-gradient(180deg, #1d78d6 0%, var(--lagoon) 35%, var(--deep) 100%);
+}
+.auth-canvas { position: absolute; inset: 0; width: 100%; height: 100%; image-rendering: pixelated; }
+.sea-sand {
+  position: absolute; left: 0; right: 0; bottom: 0; height: 16px; z-index: 1;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 4' shape-rendering='crispEdges'%3E%3Cpath fill='%23f4fbff' d='M0 2h4V1h4v1h4v1h4v1H0z'/%3E%3C/svg%3E") repeat-x left bottom / 64px 16px;
+}
+.site-skin .auth-card { position: relative; z-index: 2; width: min(420px, 100%); padding: 0 26px 24px; }
+.site-skin .auth-tabs { margin: 0 -26px 22px; border-bottom: var(--border); }
+.site-skin .auth-tab {
+  padding: 13px 8px; font-family: var(--font-body); font-weight: 800; font-size: 15px;
+  color: var(--ink-soft); background: var(--foam); box-shadow: none; border: 0;
+}
+.site-skin .auth-tab + .auth-tab { border-left: var(--border); }
+.site-skin .auth-tab[aria-selected='true'] { color: var(--ink); background: var(--aqua); box-shadow: none; }
+.site-skin .auth-tab:first-child[aria-selected='false'],
+.site-skin .auth-tab:last-child[aria-selected='false'] { box-shadow: none; }
+.site-skin .auth-title { margin: 0 0 18px; font-family: var(--font-body); font-weight: 900; font-size: 24px; }
+.site-skin .auth-submit { width: 100%; margin-top: 4px; }
+.site-skin .auth-card .preview-entry { display: inline-block; margin-top: 16px; font-weight: 800; color: var(--lagoon); }
+.site-skin .auth-card .preview-note { margin: 4px 0 0; padding: 0; font-size: 13px; text-align: left; color: var(--ink-soft); }
+.site-skin .form-error:empty { min-height: 0; margin: 0 0 6px; }
+
+/* =========================================================
+   내 어항
+   ========================================================= */
+.site-skin .tanks-main { max-width: 1120px; padding: 36px 20px 72px; gap: 36px; }
+.site-skin .tanks-actions { top: 92px; }
+.site-skin .box-title { font-family: var(--font-body); font-weight: 900; font-size: 19px; }
+.site-skin .box-help { color: var(--ink-soft); }
+.site-skin .code-input { font-family: var(--font-pixel); font-weight: 700; }
+.site-skin .tanks-notice { background: var(--ink); color: #fff; border: var(--border); box-shadow: var(--shadow-sm); }
+.site-skin .tank-grid { gap: 26px; }
+.site-skin .tank-link { transition: transform .08s steps(2), box-shadow .08s steps(2); }
+.site-skin .tank-link:hover { transform: translate(-3px, -3px); box-shadow: 9px 9px 0 var(--ink); }
+.site-skin .tank-link:hover .tile-water { filter: none; }
+.site-skin .tile-water {
+  background: linear-gradient(180deg, #1d78d6 0 55%, var(--lagoon) 55% 80%, var(--sand) 80%);
+  box-shadow: none; border-bottom: var(--border);
+}
+.site-skin .tile-name { font-family: var(--font-body); font-weight: 900; font-size: 18px; }
+.site-skin .tile-code b { font-family: var(--font-pixel); font-weight: 700; }
+.site-skin .big-code { font-family: var(--font-pixel); font-weight: 700; background: var(--foam); box-shadow: none; border: var(--border); }
+.site-skin .created-dialog::backdrop,
+.site-skin .admin-dialog::backdrop { background: rgba(11, 29, 58, .6); }
+
+/* =========================================================
+   관리자
+   ========================================================= */
+.site-skin .admin-main { max-width: 1120px; padding: 32px 20px 72px; }
+.site-skin .admin-tabs { gap: 6px; margin: 0 0 -3px; flex-wrap: wrap; }
+.site-skin .admin-tab {
+  position: relative; padding: 10px 18px;
+  font-family: var(--font-body); font-weight: 800; font-size: 15px;
+  color: var(--ink); background: var(--foam);
+  border: var(--border); box-shadow: none;
+}
+.site-skin .admin-tab:hover { background: #fff; }
+.site-skin .admin-tab[aria-selected='true'] { background: var(--aqua); box-shadow: none; z-index: 1; }
+.site-skin .admin-panel { padding: 24px; }
+.site-skin .admin-title { font-family: var(--font-body); font-weight: 900; font-size: 22px; }
+.site-skin .stat { background: var(--foam); border: var(--border); box-shadow: var(--shadow-sm); }
+.site-skin .stat dt { font-weight: 700; color: var(--ink-soft); }
+.site-skin .stat dd { font-family: var(--font-pixel); font-weight: 700; }
+.site-skin .admin-table th { font-family: var(--font-body); font-weight: 800; font-size: 13px; color: var(--ink); box-shadow: inset 0 -3px 0 var(--ink); }
+.site-skin .admin-table td { background: #fff; box-shadow: inset 0 -1px 0 #c9dcef; }
+.site-skin .admin-table tr:hover td { background: var(--foam); }
+.site-skin .chips li { background: var(--foam); box-shadow: none; border: 2px solid var(--ink); font-weight: 600; }
+.site-skin .chips li.owner { background: var(--yellow); border-color: var(--ink); }
+.site-skin .admin-dialog { padding: 24px; }
+.site-skin .dlg-title { font-family: var(--font-body); font-weight: 900; }
+.site-skin .toast { font-family: var(--font-body); background: var(--ink); border: var(--border); box-shadow: var(--shadow-sm); }
+
+/* ---------- 휴대폰 ---------- */
+@media (max-width: 640px) {
+  .site-top-inner { min-height: 60px; gap: 8px; padding: 0 14px; }
+  .site-top .brand img { width: 112px; }
+  .site-top .top-left { gap: 8px; }
+  .site-top .badge { padding: 1px 6px; font-size: .72rem; }
+  .site-top .bar-user { flex-wrap: nowrap; gap: 6px; }
+  .site-top .bar-nick { display: none; }
+  .site-top .bar-pearls { padding: 3px 7px; font-size: 13px; }
+  .site-skin .site-top .btn--small { padding: 6px 8px; font-size: 13px; white-space: nowrap; }
+  .site-hero-inner { padding: 28px 16px 44px; }
+  .site-skin .tanks-main, .site-skin .admin-main { padding: 24px 16px 56px; }
+  .site-skin .admin-tab { flex: 1; padding: 9px 10px; font-size: 14px; }
+  .site-skin .admin-panel { padding: 18px 14px; }
+  .auth-sea { min-height: calc(100vh - 63px); padding: 28px 16px 56px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .site-skin .btn, .site-skin .tank-link { transition: none; }
+}

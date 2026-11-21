@@ -13,7 +13,7 @@ const PASSWORD = 'aquabit123';
 const USERS = [
   { username: 'test1', nickname: '민규', pearls: 120, food: 6 },
   { username: 'test2', nickname: '수빈', pearls: 80, food: 3 },
-  { username: 'test3', nickname: '지우', pearls: 45, food: 0 },
+  { username: 'test3', nickname: '현규', pearls: 45, food: 0 },
 ];
 const INVITE_CODE = 'AQUA77';
 
@@ -89,7 +89,7 @@ const INVITE_CODE = 'AQUA77';
   console.log(`  계정: ${USERS.map((u) => u.username).join(', ')} / 비밀번호: ${PASSWORD}`);
   console.log(`  어항: 클라우드 7팀 (초대 코드 ${INVITE_CODE}, 대표 test1)`);
   console.log(admin.skipped ? `  관리자 계정: 만들지 않음 (${admin.skipped})` : `  관리자 계정: ${admin.username} (비밀번호는 .env의 ADMIN_PASSWORD)`);
-  console.log('  test1은 6일 연속 출석 상태 (오늘 접속하면 7일 보너스), 지우의 물고기는 먹이 1개면 Lv.2');
+  console.log('  test1은 6일 연속 출석 상태 (오늘 접속하면 7일 보너스), 현규의 물고기는 먹이 1개면 Lv.2');
   await pool.end();
 })().catch(async (e) => {
   console.error('시드 실패:', e.message);

@@ -8,11 +8,18 @@
   <link rel="stylesheet" href="/community/css/pages.css">
 <link rel="stylesheet" href="/play/community-entry.css">
 <link rel="stylesheet" href="/play/community-shared.css">
+  <link rel="stylesheet" href="/community/css/site.css">
 </head>
-<body class="auth-page" data-community-page="login">
-  <div class="auth-tank" id="bgTank"></div>
-  <a class="wordmark-float pixel" href="/">AQUABIT</a>
+<body class="site-skin auth-page" data-community-page="login">
+  <header class="site-top">
+    <div class="site-top-inner">
+      <a class="brand" href="/" aria-label="AQUABIT 홈"><img src="/img/logo.svg" alt="AQUABIT" width="174" height="27"></a>
+      <a class="btn btn--foam btn--small" href="/">홈으로</a>
+    </div>
+  </header>
 
+  <section class="auth-sea">
+  <canvas class="auth-canvas" id="aquarium-canvas" aria-hidden="true"></canvas>
   <main class="auth-card panel">
     <div class="auth-tabs" role="tablist" aria-label="로그인 또는 회원가입">
       <button class="auth-tab" role="tab" id="tabLogin" aria-controls="loginForm" aria-selected="true">로그인</button>
@@ -51,11 +58,11 @@
       <button class="btn btn--big auth-submit" type="submit">가입하고 시작하기</button>
     </form>
   <a class="preview-entry" href="/community/tank.html?id=1&amp;preview=1">체험하기 →</a><p class="preview-note">계정 없이 화면과 메뉴를 확인할 수 있어요.</p></main>
+  <div class="sea-sand" aria-hidden="true"></div>
+  </section>
 
-  
-  
-  
-  
+  <!-- 랜딩페이지 메인 배너와 같은 픽셀 아쿠아리움 -->
+  <script src="/js/aquarium.js" defer></script>
 <script type="module" src="/play/community-entry.js"></script>
 </body>
 </html>

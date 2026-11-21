@@ -8,18 +8,29 @@
   <link rel="stylesheet" href="/community/css/pages.css">
   <link rel="stylesheet" href="/play/community-shared.css">
   <link rel="stylesheet" href="/community/css/admin.css">
+  <link rel="stylesheet" href="/community/css/site.css">
 </head>
-<body class="sea-bg admin-page">
-  <header class="bar">
-    <div class="bar-left">
-      <a class="wordmark-inline pixel" href="/">AQUABIT</a>
-      <span class="tag tag--sand">관리자</span>
-    </div>
-    <div class="bar-user">
-      <a class="btn btn--foam btn--small" href="/community/tanks.html">내 어항</a>
-      <button class="btn btn--foam btn--small" id="logoutBtn" type="button">로그아웃</button>
+<body class="site-skin sea-bg admin-page">
+  <header class="site-top">
+    <div class="site-top-inner">
+      <div class="top-left">
+        <a class="brand" href="/" aria-label="AQUABIT 홈"><img src="/img/logo.svg" alt="AQUABIT" width="174" height="27"></a>
+        <span class="badge">관리자</span>
+      </div>
+      <div class="bar-user">
+        <a class="btn btn--foam btn--small" href="/community/tanks.html">내 어항</a>
+        <button class="btn btn--foam btn--small" id="logoutBtn" type="button">로그아웃</button>
+      </div>
     </div>
   </header>
+
+  <section class="site-hero">
+    <div class="site-hero-inner">
+      <p class="eyebrow">ADMIN</p>
+      <h1 class="site-hero-title">관리자</h1>
+      <p class="site-hero-lead">모든 어항과 사용자를 보고, 진주·아이템을 지급하고, 공지를 보내요.</p>
+    </div>
+  </section>
 
   <main class="admin-main">
     <div class="admin-tabs" role="tablist" aria-label="관리 메뉴">
@@ -30,12 +41,12 @@
     </div>
 
     <section class="admin-panel panel" id="panel-overview" role="tabpanel" aria-labelledby="tab-overview">
-      <h1 class="admin-title pixel">한눈에 보기</h1>
+      <h2 class="admin-title pixel">한눈에 보기</h2>
       <dl class="stats" id="stats"></dl>
     </section>
 
     <section class="admin-panel panel" id="panel-tanks" role="tabpanel" aria-labelledby="tab-tanks" hidden>
-      <h1 class="admin-title pixel">모든 어항</h1>
+      <h2 class="admin-title pixel">모든 어항</h2>
       <div class="table-wrap">
         <table class="admin-table">
           <thead><tr><th>어항</th><th>초대 코드</th><th>대표</th><th>팀원 (아이디, 물고기 단계)</th><th>진행 중 과제</th><th>채팅</th><th></th></tr></thead>
@@ -46,7 +57,7 @@
 
     <section class="admin-panel panel" id="panel-users" role="tabpanel" aria-labelledby="tab-users" hidden>
       <div class="panel-head">
-        <h1 class="admin-title pixel">사용자</h1>
+        <h2 class="admin-title pixel">사용자</h2>
         <label class="sr-only" for="userSearch">아이디나 닉네임 검색</label>
         <input class="input search" id="userSearch" placeholder="아이디나 닉네임 검색">
       </div>
@@ -59,7 +70,7 @@
     </section>
 
     <section class="admin-panel panel" id="panel-notices" role="tabpanel" aria-labelledby="tab-notices" hidden>
-      <h1 class="admin-title pixel">공지 보내기</h1>
+      <h2 class="admin-title pixel">공지 보내기</h2>
       <p class="admin-help">공지는 고른 어항의 채팅에 관리자 이름으로 남고, 지금 접속해 있는 사람에게는 화면 위에 바로 떠요.</p>
       <form class="notice-form" id="noticeForm" novalidate>
         <div class="field">

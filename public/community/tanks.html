@@ -9,16 +9,27 @@
   <link rel="stylesheet" href="/community/css/fx.css">
 <link rel="stylesheet" href="/play/community-entry.css">
 <link rel="stylesheet" href="/play/community-shared.css">
+  <link rel="stylesheet" href="/community/css/site.css">
 </head>
-<body class="sea-bg tanks-page" data-community-page="tanks">
-  <header class="bar">
-    <a class="wordmark-inline pixel" href="/">AQUABIT</a>
-    <div class="bar-user">
-      <span class="bar-pearls pixel" id="pearlChip" title="내 진주"><span id="pearlIcon"></span><b id="pearlCount">0</b></span>
-      <span class="bar-nick" id="nick"></span>
-      <button class="btn btn--foam btn--small" id="logoutBtn" type="button">로그아웃</button>
+<body class="site-skin sea-bg tanks-page" data-community-page="tanks">
+  <header class="site-top">
+    <div class="site-top-inner">
+      <a class="brand" href="/" aria-label="AQUABIT 홈"><img src="/img/logo.svg" alt="AQUABIT" width="174" height="27"></a>
+      <div class="bar-user">
+        <span class="bar-pearls pixel" id="pearlChip" title="내 진주"><span id="pearlIcon"></span><b id="pearlCount">0</b></span>
+        <span class="bar-nick" id="nick"></span>
+        <button class="btn btn--foam btn--small" id="logoutBtn" type="button">로그아웃</button>
+      </div>
     </div>
   </header>
+
+  <section class="site-hero">
+    <div class="site-hero-inner">
+      <p class="eyebrow">PIXEL AQUARIUM</p>
+      <h1 class="site-hero-title" id="listTitle">내 어항</h1>
+      <p class="site-hero-lead">어항을 만들거나, 팀원에게 받은 초대 코드로 들어가세요.</p>
+    </div>
+  </section>
 
   <main class="tanks-main">
     <section class="tanks-actions" aria-label="어항 만들기와 참여">
@@ -46,7 +57,6 @@
     </section>
 
     <section class="tanks-list-wrap" aria-labelledby="listTitle">
-      <h1 class="page-title" id="listTitle">내 어항</h1>
       <p class="tanks-notice" id="notice" role="status" hidden></p>
       <p class="tanks-empty panel panel--glass" id="emptyMsg" hidden>아직 들어간 어항이 없어요. 왼쪽에서 어항을 만들거나 팀원에게 받은 코드를 입력해 보세요.</p>
       <ul class="tank-grid" id="tankGrid"></ul>

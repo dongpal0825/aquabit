@@ -332,14 +332,14 @@
 | 이벤트 | 데이터 | 화면 |
 |---|---|---|
 | `chat:message` | `{ id, userId, nickname, body, createdAt }` | 채팅 추가 |
-| `member:joined` | `{ userId, nickname }` | "지우님이 어항에 들어왔어요!" |
-| `member:left` | `{ userId, nickname, removedTasks }` | "지우님이 어항을 나갔어요." |
+| `member:joined` | `{ userId, nickname }` | "현규님이 어항에 들어왔어요!" |
+| `member:left` | `{ userId, nickname, removedTasks }` | "현규님이 어항을 나갔어요." |
 | `tank:owner-changed` | `{ fromUserId, fromNickname, toUserId, toNickname, removedTasks }` | "수빈님이 새 대표가 됐어요." (받은 사람에게는 안내) |
 | `tank:deleted` | `{ tankName, byUserId, byNickname }` | 목록으로 이동하며 "민규님이 클라우드 7팀 어항을 삭제했어요." |
 | `fish:fed` | `{ feederId, feederNickname, fish, wasStatus }` | 먹이가 떨어지고 물고기가 먹음. "민규님이 수빈님의 물고기에게 먹이를 줬어요!" |
 | `fish:grew` | `{ feederId, fish, stage, stageName }` | 반짝임 + "수빈님의 물고기가 어른 물고기로 성장했어요!" (내 물고기면 LEVEL UP!) |
 | `fish:updated` | `{ fish }` | 꾸미기 반영 |
-| `attendance` | `{ userId, nickname, reward, bonus, streak }` | "지우님이 출석해서 10진주를 받았어요!" |
+| `attendance` | `{ userId, nickname, reward, bonus, streak }` | "현규님이 출석해서 10진주를 받았어요!" |
 | `task:created` | `{ task }` | 담당자에게 "새 과제가 왔어요" |
 | `task:submitted` | `{ task }` | 대표에게 "수빈님이 과제를 제출했어요" |
 | `task:approved` | `{ task }` | "수빈님의 과제가 승인됐어요! +60진주" |
