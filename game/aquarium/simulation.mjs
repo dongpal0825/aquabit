@@ -236,7 +236,9 @@ export class AquariumSimulation {
       if (target && this.time - f.lastBite > 180) {
         const dx = (target.x - f.x) * this.view.width, dy = (target.y - f.y) * this.view.height;
         if (nearest > .1) {
-          const step = Math.min(nearest, 155 * dt / 1000);
+          // 먹이까지 거리에 비례해 돌진: 멀수록 빠르게(최대 초당 560px), 가까우면 기본 속도(155px). 어디에 떨어뜨려도 1초 남짓이면 닿는다.
+          const speed = Math.min(560, Math.max(155, nearest * 5.5));
+          const step = Math.min(nearest, speed * dt / 1000);
           f.x += dx / nearest * step / this.view.width;
           f.y += dy / nearest * step / this.view.height;
           if (Math.abs(dx) > 2) f.vx = (dx >= 0 ? 1 : -1) * Math.abs(f.vx);
