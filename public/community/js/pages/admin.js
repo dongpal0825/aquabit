@@ -19,7 +19,7 @@
   const fmtDate = (v) => (v ? new Date(v).toLocaleDateString('ko-KR', { timeZone: 'Asia/Seoul' }) : '-');
 
   // ── 탭 ──
-  const loaders = { overview: loadOverview, tanks: loadTanks, users: loadUsers, notices: loadNoticeTargets };
+  const loaders = { overview: loadOverview, tanks: loadTanks, users: loadUsers, site: loadSiteNotices, notices: loadNoticeTargets };
   function showTab(name) {
     document.querySelectorAll('.admin-tab').forEach((b) => b.setAttribute('aria-selected', String(b.dataset.tab === name)));
     document.querySelectorAll('.admin-panel').forEach((p) => { p.hidden = p.id !== 'panel-' + name; });
@@ -183,6 +183,72 @@
       tanks = [];
       loadUsers();
     } catch (ex) { $('userDelError').textContent = ex.message; }
+  });
+
+  // ── 홈페이지 공지사항 ──
+  const SITE_LABEL = { notice: '공지', update: '업데이트', maintenance: '점검', event: '이벤트' };
+  let siteNotices = [];
+  let siteEditing = null; // null이면 새 공지
+  const todayKst = () => new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Seoul' }).format(new Date());
+  async function loadSiteNotices() {
+    siteNotices = (await Aqua.api('/admin/site-notices')).notices;
+    const rows = $('siteRows');
+    if (!siteNotices.length) { rows.innerHTML = '<tr><td colspan="4" class="empty">아직 공지가 없어요. "새 공지 쓰기"로 올려 보세요.</td></tr>'; return; }
+    rows.innerHTML = siteNotices.map((n) => `
+      <tr>
+        <td><span class="site-badge site-badge--${n.category}">${SITE_LABEL[n.category] || '공지'}</span></td>
+        <td><a href="/notices/${n.id}" target="_blank" rel="noopener"><b>${esc(n.title)}</b></a><small>${esc(n.body.split('\n')[0]).slice(0, 60)}</small></td>
+        <td class="pixel">${n.date.replace(/-/g, '.')}</td>
+        <td class="actions">
+          <button class="btn btn--small btn--foam" data-site-edit="${n.id}">수정</button>
+          <button class="btn btn--small btn--coral" data-site-del="${n.id}">삭제</button>
+        </td>
+      </tr>`).join('');
+    rows.querySelectorAll('[data-site-edit]').forEach((b) => b.addEventListener('click', () => openSiteEditor(Number(b.dataset.siteEdit))));
+    rows.querySelectorAll('[data-site-del]').forEach((b) => b.addEventListener('click', () => openSiteDelete(Number(b.dataset.siteDel))));
+  }
+  function openSiteEditor(id) {
+    siteEditing = id ? siteNotices.find((n) => n.id === id) : null;
+    $('siteDlgTitle').textContent = siteEditing ? '공지 수정' : '새 공지';
+    $('sdSubmit').textContent = siteEditing ? '저장하기' : '올리기';
+    $('sdCategory').value = siteEditing ? siteEditing.category : 'notice';
+    $('sdDate').value = siteEditing ? siteEditing.date : todayKst();
+    $('sdTitle').value = siteEditing ? siteEditing.title : '';
+    $('sdBody').value = siteEditing ? siteEditing.body : '';
+    $('sdError').textContent = '';
+    $('siteDialog').showModal();
+    $('sdTitle').focus();
+  }
+  $('siteNewBtn').addEventListener('click', () => openSiteEditor(null));
+  $('siteForm').addEventListener('submit', async (e) => {
+    if (!e.submitter || e.submitter.value !== 'ok') return;
+    e.preventDefault();
+    const body = { category: $('sdCategory').value, date: $('sdDate').value, title: $('sdTitle').value, body: $('sdBody').value };
+    try {
+      const r = siteEditing
+        ? await Aqua.api(`/admin/site-notices/${siteEditing.id}`, { method: 'PATCH', body })
+        : await Aqua.api('/admin/site-notices', { method: 'POST', body });
+      $('siteDialog').close();
+      toast(`<b>${esc(r.notice.title)}</b> 공지를 ${siteEditing ? '저장했어요' : '올렸어요'}.`);
+      loadSiteNotices();
+    } catch (ex) { $('sdError').textContent = ex.message; }
+  });
+  let siteDeleting = null;
+  function openSiteDelete(id) {
+    siteDeleting = siteNotices.find((n) => n.id === id);
+    $('siteDelText').innerHTML = `<b>${esc(siteDeleting.title)}</b> 공지를 삭제할까요? 홈페이지에서 바로 사라지고 되돌릴 수 없어요.`;
+    $('siteDelError').textContent = '';
+    $('siteDelDialog').showModal();
+  }
+  $('siteDelForm').addEventListener('submit', async (e) => {
+    if (!e.submitter || e.submitter.value !== 'ok') return;
+    e.preventDefault();
+    try {
+      await Aqua.api(`/admin/site-notices/${siteDeleting.id}`, { method: 'DELETE', body: {} });
+      $('siteDelDialog').close();
+      toast(`<b>${esc(siteDeleting.title)}</b> 공지를 삭제했어요.`);
+      loadSiteNotices();
+    } catch (ex) { $('siteDelError').textContent = ex.message; }
   });
 
   // ── 공지 ──

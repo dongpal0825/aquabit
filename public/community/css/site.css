@@ -207,6 +207,16 @@
 .site-skin .chips li.owner { background: var(--yellow); border-color: var(--ink); }
 .site-skin .admin-dialog { padding: 24px; }
 .site-skin .dlg-title { font-family: var(--font-body); font-weight: 900; }
+/* 홈페이지 공지 분류 배지 (홈페이지 .badge와 같은 색) */
+.site-badge { display: inline-block; padding: 1px 9px; font-size: 13px; font-weight: 800; white-space: nowrap; border: 2px solid var(--ink); background: var(--foam); }
+.site-badge--notice { background: var(--aqua); }
+.site-badge--update { background: var(--mint); }
+.site-badge--maintenance { background: var(--coral); }
+.site-badge--event { background: var(--yellow); }
+.site-skin .admin-table td a { color: var(--ink); text-decoration: none; }
+.site-skin .admin-table td a:hover b { text-decoration: underline; }
+.site-skin .site-dialog { width: min(600px, calc(100% - 32px)); }
+.site-skin .site-dialog textarea { min-height: 180px; line-height: 1.6; }
 .site-skin .toast { font-family: var(--font-body); background: var(--ink); border: var(--border); box-shadow: var(--shadow-sm); }
 
 /* ---------- 휴대폰 ---------- */

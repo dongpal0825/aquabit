@@ -144,3 +144,16 @@ CREATE TABLE IF NOT EXISTS feedings (
 ) ENGINE=InnoDB;
 
 -- 로그인 세션 테이블(sessions)은 express-mysql-session이 자동으로 만든다.
+
+-- 회사 홈페이지 공지사항 (관리자 화면에서 추가·수정·삭제). 본문은 한 줄이 한 문단.
+-- 처음 만들 때 data/notices.json의 공지를 같은 번호로 가져온다 (scripts/init-community-db.cjs).
+CREATE TABLE IF NOT EXISTS site_notices (
+  id          INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  category    ENUM('notice','update','maintenance','event') NOT NULL DEFAULT 'notice',
+  title       VARCHAR(100) NOT NULL,
+  body        TEXT         NOT NULL,
+  notice_date DATE         NOT NULL,
+  created_at  DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at  DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  KEY idx_site_notices_date (notice_date)
+) ENGINE=InnoDB;
