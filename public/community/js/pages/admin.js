@@ -127,10 +127,11 @@
         <td>먹이 ${u.inventory.food}${acc.length ? `<small>${acc.join(', ')}</small>` : ''}</td>
         <td>${u.tanks.length ? `<ul class="chips">${u.tanks.map((t) => `<li${t.isOwner ? ' class="owner"' : ''}>${esc(t.name)}${t.isOwner ? ' <small>대표</small>' : ''}</li>`).join('')}</ul>` : '<span class="muted">없음</span>'}</td>
         <td>${u.lastAttendance || '<span class="muted">-</span>'}</td>
-        <td class="actions">${u.isAdmin ? '' : `<button class="btn btn--small btn--sea" data-grant="${u.id}">지급</button>`}</td>
+        <td class="actions">${u.isAdmin ? '' : `<button class="btn btn--small btn--sea" data-grant="${u.id}">지급</button><button class="btn btn--small btn--coral" data-kick="${u.id}">탈퇴</button>`}</td>
       </tr>`;
     }).join('');
     rows.querySelectorAll('[data-grant]').forEach((b) => b.addEventListener('click', () => openGrant(Number(b.dataset.grant))));
+    rows.querySelectorAll('[data-kick]').forEach((b) => b.addEventListener('click', () => openKick(Number(b.dataset.kick))));
   }
   $('userSearch').addEventListener('input', () => { clearTimeout(searchTimer); searchTimer = setTimeout(() => loadUsers().catch((e) => toast(esc(e.message))), 250); });
 
@@ -157,6 +158,31 @@
       toast(`${esc(r.summary)} 지급했어요.`);
       loadUsers();
     } catch (ex) { $('gError').textContent = ex.message; }
+  });
+
+  // 강제 탈퇴: 대표인 어항은 다른 팀원에게 넘어가고, 혼자인 어항은 삭제된다
+  let kicking = null;
+  function openKick(id) {
+    kicking = users.find((u) => u.id === id);
+    const owned = kicking.tanks.filter((t) => t.isOwner).map((t) => esc(t.name));
+    $('userDelText').innerHTML = `<b>${esc(kicking.nickname)}</b> (${esc(kicking.username)}) 계정을 탈퇴시킬까요? 물고기, 채팅, 진주와 아이템, 맡은 과제가 모두 지워지고 지금 접속 중이면 로그아웃돼요.`
+      + (owned.length ? ` 대표인 어항(${owned.join(', ')})은 가장 먼저 들어온 팀원에게 넘어가고, 혼자인 어항은 삭제돼요.` : '');
+    $('userDelAgree').checked = false;
+    $('userDelError').textContent = '';
+    $('userDelDialog').showModal();
+  }
+  $('userDelForm').addEventListener('submit', async (e) => {
+    if (!e.submitter || e.submitter.value !== 'ok') return;
+    e.preventDefault();
+    if (!$('userDelAgree').checked) { $('userDelError').textContent = '확인 칸을 체크해 주세요.'; return; }
+    try {
+      const r = await Aqua.api(`/admin/users/${kicking.id}`, { method: 'DELETE', body: {} });
+      $('userDelDialog').close();
+      const extra = [r.handedOver.length ? `대표 넘김 ${r.handedOver.length}곳` : '', r.deletedTanks.length ? `어항 삭제 ${r.deletedTanks.length}곳` : ''].filter(Boolean).join(', ');
+      toast(`<b>${esc(r.nickname)}</b>님을 탈퇴시켰어요.${extra ? ' (' + esc(extra) + ')' : ''}`);
+      tanks = [];
+      loadUsers();
+    } catch (ex) { $('userDelError').textContent = ex.message; }
   });
 
   // ── 공지 ──

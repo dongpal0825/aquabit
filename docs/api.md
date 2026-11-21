@@ -28,7 +28,7 @@
 ```
 - `username`: 영문, 숫자, `_` 4~20자 (중복 시 400 `DUP_USERNAME`)
 - `password`: 6~72자 (bcrypt 해시로 저장)
-- `nickname`: 1~12자
+- `nickname`: 1~12자, **다른 사람과 겹치면 안 됨** (400 `DUP_NICKNAME`, DB에도 UNIQUE). `관리자`·`운영자`·`공지`·`admin`은 400 `RESERVED_NICKNAME`
 
 응답 201: `{ "user": { "id", "username", "nickname", "pearls" } }`
 
@@ -43,6 +43,17 @@
 
 ### GET /api/game/auth/me
 현재 로그인한 사용자. 응답 `{ "user": {...} }` / 401
+
+### DELETE /api/game/auth/me (회원 탈퇴)
+```json
+{ "password": "현재 비밀번호" }
+```
+- 비밀번호가 틀리면 400 `BAD_PASSWORD`, 관리자 계정은 400 `ADMIN_CANNOT_DELETE`
+- 대표인 어항은 가장 먼저 들어온 다른 팀원에게 넘어가고(그 팀원의 끝나지 않은 과제는 지움), 혼자인 어항은 삭제
+- 이 사람이 담당인 과제는 지우고, 이 사람이 만든 과제는 그 어항의 지금 대표가 만든 것으로 바뀜
+- 물고기, 채팅, 진주 내역, 아이템, 출석, 먹이 기록과 로그인 세션이 함께 삭제됨
+- 응답 `{ "ok": true, "nickname", "handedOver": [{ tankId, tankName, toNickname }], "deletedTanks": [{ tankId, tankName }] }`
+- 소켓: 팀원에게 `member:left`(`accountDeleted: true`), 넘긴 어항은 `tank:owner-changed`, 삭제된 어항은 `tank:deleted`, 본인에게 `account:deleted` 후 연결 끊김
 
 ---
 
@@ -300,6 +311,7 @@
 | DELETE | `/admin/tanks/:id` | 어항 삭제 (이름 확인 없음). 소켓 `tank:deleted` |
 | GET | `/admin/users?q=` | 사용자, 진주, 아이템, 들어간 어항(대표 여부), 마지막 출석. `q`로 아이디/닉네임 검색 |
 | POST | `/admin/users/:id/grant` | `{ pearls?, item?, quantity?, reason? }` 진주 지급(음수면 회수, 잔액보다 많이는 불가), 먹이/장신구 지급. 진주 변동은 transactions에 `admin`으로 기록 |
+| DELETE | `/admin/users/:id` | 강제 탈퇴. 관리자 계정은 400 `ADMIN_CANNOT_DELETE`. 처리 내용과 응답은 `DELETE /auth/me`와 같음 |
 | POST | `/admin/notices` | `{ body, tankId? }` 공지. `tankId`가 없으면 모든 어항. 채팅에 관리자 이름으로 남고 소켓 `notice` |
 
 관리자 관련 소켓 이벤트: `notice` `{ body }`(어항 방), `tank:updated`(어항 방), `wallet:changed` `{ pearls, inventory, item, quantity, pearlsDelta, note }`(개인 방), 관리자 진주 지급은 `wallet:pearls`에 `reason: "admin"`.
@@ -351,3 +363,4 @@
 |---|---|---|
 | `wallet:pearls` | `{ pearls, amount, reason, taskTitle }` | 과제 승인 진주가 날아와 HUD에 쌓임 |
 | `auth:required` | 없음 | 로그인 화면으로 |
+| `account:deleted` | `{ by }` (`self` 또는 `admin`) | 계정이 탈퇴 처리됨. 로그인 화면으로 (서버가 연결을 끊음) |

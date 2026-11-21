@@ -17,6 +17,23 @@ async function prepareSchema(connection) {
   const species = [...new Set([...Object.keys(require('../game/domain/creature-aliases.json')), ...Object.keys(catalog)])];
   await connection.query(`ALTER TABLE fish MODIFY species ENUM(${species.map(key => connection.escape(key)).join(',')}) NOT NULL DEFAULT 'gold'`);
   await connection.query("ALTER TABLE fish MODIFY color ENUM('original','orange','coral','lemon','mint','sky','grape') NOT NULL DEFAULT 'original'");
+
+  // 닉네임 중복 금지 (예전 DB에는 이 제약이 없음). 이미 겹치는 닉네임은 뒤에 가입한 쪽에 번호를 붙여 바꾼 뒤 제약을 건다.
+  const [nickIndex] = await connection.query("SHOW INDEX FROM users WHERE Key_name = 'uq_users_nickname'");
+  if (!nickIndex.length) {
+    const [dups] = await connection.query(
+      `SELECT u.id, u.nickname FROM users u
+        WHERE EXISTS (SELECT 1 FROM users o WHERE o.nickname = u.nickname AND o.id < u.id) ORDER BY u.id`
+    );
+    for (const d of dups) {
+      let n = 2, next;
+      do { const tail = String(n++); next = d.nickname.slice(0, 12 - tail.length) + tail; }
+      while ((await connection.query('SELECT 1 FROM users WHERE nickname = ?', [next]))[0].length);
+      await connection.query('UPDATE users SET nickname = ? WHERE id = ?', [next, d.id]);
+      console.log(`  닉네임 중복 정리: ${d.nickname} → ${next} (사용자 ${d.id})`);
+    }
+    await connection.query('ALTER TABLE users ADD UNIQUE KEY uq_users_nickname (nickname)');
+  }
 }
 
 async function connect() {

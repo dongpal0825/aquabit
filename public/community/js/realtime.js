@@ -31,6 +31,8 @@
     });
     socket.on('disconnect', () => { joined = false; });
     socket.on('auth:required', () => location.replace('/community/login.html?next=' + encodeURIComponent(location.pathname + location.search)));
+    // 계정이 탈퇴 처리되면 (본인 탈퇴는 다른 탭, 관리자 강제 탈퇴) 로그인 화면으로
+    socket.on('account:deleted', () => location.replace('/community/login.html'));
 
     const who = (userId, nickname) => (userId === me ? '내' : `<b>${esc(nickname)}</b>님의`);
     const fishOwner = (fish) => who(fish.userId, fish.ownerNickname);

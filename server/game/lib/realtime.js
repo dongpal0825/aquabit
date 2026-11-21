@@ -35,4 +35,11 @@ function closeTankRoom(tankId) {
   if (io) io.in(`tank:${tankId}`).socketsLeave(`tank:${tankId}`);
 }
 
-module.exports = { init, toTank, toUser, attendance, leaveTankRoom, closeTankRoom };
+/** 탈퇴한 사람: 열려 있는 화면에 알리고 연결을 끊는다 (화면은 로그인 페이지로 이동) */
+function kickUser(userId, { by = 'self' } = {}) {
+  if (!io) return;
+  io.to(`user:${userId}`).emit('account:deleted', { by });
+  io.in(`user:${userId}`).disconnectSockets(true);
+}
+
+module.exports = { init, toTank, toUser, attendance, leaveTankRoom, closeTankRoom, kickUser };

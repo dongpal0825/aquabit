@@ -13,10 +13,11 @@ CREATE TABLE IF NOT EXISTS users (
   id            INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
   username      VARCHAR(20)  NOT NULL UNIQUE,          -- 로그인 아이디 (영문/숫자/_ 4~20)
   password_hash VARCHAR(100) NOT NULL,                 -- bcrypt
-  nickname      VARCHAR(12)  NOT NULL,
+  nickname      VARCHAR(12)  NOT NULL,                 -- 팀원에게 보이는 이름 (중복 불가)
   pearls        INT UNSIGNED NOT NULL DEFAULT 0,       -- 현재 진주 잔액 (변동은 transactions에 기록)
   is_admin      TINYINT(1)   NOT NULL DEFAULT 0,       -- 관리자 (ADMIN_ENABLED=true일 때만 의미 있음)
-  created_at    DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP
+  created_at    DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE KEY uq_users_nickname (nickname)
 ) ENGINE=InnoDB;
 
 -- 어항

@@ -121,4 +121,30 @@
   if (location.hash === '#join') codeInput.focus();
 
   load().catch((e) => { empty.hidden = false; empty.textContent = e.message; });
+
+  // ── 회원 탈퇴 (관리자 계정은 .env로 관리하므로 표시하지 않음) ──
+  const bye = { box: document.getElementById('accountBox'), dialog: document.getElementById('byeDialog') };
+  if (!user.isAdmin) bye.box.hidden = false;
+  document.getElementById('byeBtn').addEventListener('click', async () => {
+    let owned = [];
+    try { owned = (await Aqua.api('/tanks')).tanks.filter((t) => t.isOwner).map((t) => t.name); } catch (e) { /* 무시 */ }
+    document.getElementById('byeText').innerHTML =
+      `<b>${Aqua.escapeHtml(user.nickname)}</b> 계정을 탈퇴할까요? 물고기, 채팅, 진주와 아이템, 맡은 과제가 모두 지워져요.`
+      + (owned.length ? ` 대표인 어항(${owned.map(Aqua.escapeHtml).join(', ')})은 가장 먼저 들어온 팀원에게 넘어가고, 혼자인 어항은 삭제돼요.` : '');
+    document.getElementById('byePw').value = '';
+    document.getElementById('byeAgree').checked = false;
+    document.getElementById('byeError').textContent = '';
+    bye.dialog.showModal();
+    document.getElementById('byePw').focus();
+  });
+  document.getElementById('byeForm').addEventListener('submit', async (e) => {
+    if (!e.submitter || e.submitter.value !== 'ok') return;
+    e.preventDefault();
+    const err = document.getElementById('byeError');
+    if (!document.getElementById('byeAgree').checked) { err.textContent = '확인 칸을 체크해 주세요.'; return; }
+    try {
+      await Aqua.api('/auth/me', { method: 'DELETE', body: { password: document.getElementById('byePw').value } });
+      location.replace('/?bye=1');
+    } catch (ex) { err.textContent = ex.message; }
+  });
 })();
